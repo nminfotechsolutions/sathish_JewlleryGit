@@ -100,7 +100,7 @@ class _SigninScreenState extends State<SigninScreen> {
        const SnackBar(
           backgroundColor: Colors.red,
           content: Text(
-            'The entered mobile number is more than 11 digit',
+            'The entered mobile number is more than 11 digits',
           ),
         ),
       );
