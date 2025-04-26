@@ -97,10 +97,10 @@ class _SigninScreenState extends State<SigninScreen> {
 
     if (Mobno.length > 10) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+       const SnackBar(
           backgroundColor: Colors.red,
           content: Text(
-            'The entered mobile number is more than 11 digits',
+            'The entered mobile number is more than 11 digit',
           ),
         ),
       );
