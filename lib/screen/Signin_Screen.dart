@@ -77,7 +77,7 @@ class _SigninScreenState extends State<SigninScreen> {
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => CommonBottomnavigation()));
       } else {
-        commonUtils.showToast('Invalid username or password',
+        commonUtils.showToast('Invalid username or passwords',
             backgroundColor: AppColors.CommonRed);
         _EmailandphnController.text = "";
         _PasswordController.text = "";
@@ -97,7 +97,7 @@ class _SigninScreenState extends State<SigninScreen> {
 
     if (Mobno.length > 10) {
       ScaffoldMessenger.of(context).showSnackBar(
-       const SnackBar(
+        const SnackBar(
           backgroundColor: Colors.red,
           content: Text(
             'The entered mobile number is more than 11 digit',

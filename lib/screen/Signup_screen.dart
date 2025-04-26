@@ -177,7 +177,7 @@ class _LoginScreenState extends State<login_screen> {
     String query = '''
     select * from usermaster where email = '$email'
   ''';
-    commonUtils.log.i("Fetch Data From Login Screen: $query");
+    commonUtils.log.i("Fetch Data From Login Screens: $query");
 
     dynamic results = await sqlService.fetchData(query);
 
