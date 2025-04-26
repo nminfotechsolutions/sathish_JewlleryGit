@@ -20,6 +20,10 @@ class _payment_gatewayState extends State<payment_gateway> {
   // key_id,key_secret
   // rzp_test_4QXEpvReNPfzd9,7n29FL6ICF1Zf9FQ75BWHmpT
 
+  // Sathish Jewellery
+  // key_id,key_secret
+  // rzp_live_hLjGzcUXk1M9tP,ozB11BaY7kfe7A9TvsFajqN4
+
   late Future<List<MdlCompanyData>> futureMdlCompanyData;
   List<MdlCompanyData> allMdlCompanyData = [];
   List<MdlCompanyData> filteredMdlCompanyData = [];
@@ -129,18 +133,18 @@ class _payment_gatewayState extends State<payment_gateway> {
 
   Future<String> createRazorpayOrder(double amount) async {
     var url = Uri.parse('https://api.razorpay.com/v1/orders');
-    String apiKey = 'rzp_test_4QXEpvReNPfzd9';
-    String apiSecret = '7n29FL6ICF1Zf9FQ75BWHmpT';
+    String apiKey = 'rzp_live_hLjGzcUXk1M9tP';
+    String apiSecret = 'ozB11BaY7kfe7A9TvsFajqN4';
 
     // Prepare headers for basic auth
     var headers = {
       'Authorization':
           'Basic ' + base64Encode(utf8.encode('$apiKey:$apiSecret'))
     };
-
+    // String receiptId = generateReceiptId();
     // Prepare body for the order
     var body = jsonEncode({
-      'amount': (amount * 100).toInt(), // Amount in paise
+      'amount': (amount * 100).toInt(),
       'currency': 'INR',
       'payment_capture': 1
     });
@@ -172,7 +176,7 @@ class _payment_gatewayState extends State<payment_gateway> {
     try {
       String orderId = await createRazorpayOrder(amount); // Create the order
       var options = {
-        'key': 'rzp_test_4QXEpvReNPfzd9',
+        'key': 'rzp_live_hLjGzcUXk1M9tP',
         'amount': (amount * 100).toInt(),
         'name': username,
         'description': 'Gold Chits',
@@ -193,6 +197,18 @@ class _payment_gatewayState extends State<payment_gateway> {
       print('Error creating Razorpay order: $e');
     }
   }
+
+  // String generateReceiptId() {
+  //   DateTime now = DateTime.now();
+  //   String datePart = "${now.year}${_twoDigits(now.month)}${_twoDigits(now.day)}";
+  //   int randomNumber = DateTime.now().microsecond % 10000; // Simple random part
+  //   String runningPart = randomNumber.toString().padLeft(4, '0');
+  //   return "REC-$datePart-$runningPart";
+  // }
+  //
+  // String _twoDigits(int n) {
+  //   return n.toString().padLeft(2, '0');
+  // }
 
   Future<void> saveNewScheme() async {
     String? userid = SharedPreferencesHelper.getString("USERID");
