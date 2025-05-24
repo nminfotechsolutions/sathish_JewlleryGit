@@ -50,25 +50,56 @@ class SqlConnectionService {
     }
   }
 
+  // Future<List<dynamic>?> fetchData(String query) async {
+  //   try {
+  //     if (!_isConnected) {
+  //       bool connected = await connect();
+  //       if (!connected) {
+  //         throw Exception('Failed to connect to the database');
+  //       }
+  //     }
+  //
+  //     commonUtils.log.i('Executing query: $query');
+  //     final result = await _sqlConnection.getData(query);
+  //     commonUtils.log.i('Raw result: $result');
+  //     return jsonDecode(result);
+  //   } catch (e) {
+  //     // Handle fetch data error
+  //     commonUtils.log.i('Error fetching data from SQL: $e');
+  //     return null;
+  //   } finally {
+  //     closeConnection();
+  //   }
+  // }
+
   Future<List<dynamic>?> fetchData(String query) async {
     try {
       if (!_isConnected) {
+        commonUtils.log.i('Attempting to connect...');
         bool connected = await connect();
         if (!connected) {
           throw Exception('Failed to connect to the database');
         }
       }
 
+      commonUtils.log.i('Executing query: $query');
       final result = await _sqlConnection.getData(query);
+      commonUtils.log.i('Raw result: $result');
+
       return jsonDecode(result);
-    } catch (e) {
-      // Handle fetch data error
-      commonUtils.log.i('Error fetching data from SQL: $e');
+    } catch (e, stacktrace) {
+      commonUtils.log.e('Error fetching data from SQL: $e\n$stacktrace');
       return null;
     } finally {
-      closeConnection();
+      try {
+        commonUtils.log.i('Closing connection...');
+        closeConnection();
+      } catch (e) {
+        commonUtils.log.e('Error closing connection: $e');
+      }
     }
   }
+
 
   Future<String?> writeData(String query) async {
     try {
