@@ -244,7 +244,8 @@ class _MySavingsScreenState extends State<MySavingsScreen> {
           REFNO: '',
         ),
       ];
-      await MdlJoiningNewScheme.updateDataFromServerForPayNow(NewSchemeList);
+      await MdlJoiningNewScheme.updateDataFromServerForPayNow(
+          NewSchemeList, '', '');
       // Fluttertoast.showToast(msg: "Successfully Paided");
       Navigator.pushReplacementNamed(
           context, AppRoutes.CommonBottomnavigationScreen);
@@ -374,6 +375,7 @@ class _MySavingsScreenState extends State<MySavingsScreen> {
                               filteredMdlNewScheme.isEmpty
                                   ? allNewSchemeData[index]
                                   : filteredMdlNewScheme[index];
+                          commonUtils.log.i(album.SCHNAME);
 
                           String balanceLabel;
                           String displayValue;

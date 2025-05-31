@@ -267,7 +267,9 @@ DECLARE @refno1 VARCHAR(50) = 'ONLINE' + CAST(@regno AS VARCHAR)
   }
 
   static Future<void> updateDataFromServerForPayNow(
-      List<MdlJoiningNewScheme> NewJoiningSchemeList) async {
+      List<MdlJoiningNewScheme> NewJoiningSchemeList,
+      String? Trans_id,
+      String? status) async {
     final SqlConnectionService sqlService = SqlConnectionService();
 
     for (var itemData in NewJoiningSchemeList) {
@@ -302,21 +304,40 @@ DECLARE @refno1 VARCHAR(50) = 'ONLINE' + CAST(@regno AS VARCHAR)
       String pgrswt = itemData.pgrswt;
       String pnetwt = itemData.pnetwt;
       String pamount = itemData.pamount;
-      String schemeno = itemData.SCHEMENO;
+      String schemeno = itemData.schCode;
 
+/*
       String query = '''
       DECLARE @vouno INT
       SELECT @vouno = ISNULL(MAX(vouno), 0) + 1 FROM MNTHSCHEME
       
       DECLARE @refno VARCHAR(50) = 'ONLINE' + CAST(@regno AS VARCHAR)
+      DECLARE @regno INT = $regNo;
+DECLARE @refno VARCHAR(50) = 'ONLINE' + CAST(@regno AS VARCHAR);
+
  
       INSERT INTO MNTHSCHEME (VOUNO, ROD, SCHNAME, SCHCODE, SCHAMT, REGNO, CASH,CARD,CARDNAME,CHITID, FLAG, CANCEL, BRANCHID, METVAL, SCHEMEID, GOLDRATE, SILVERRATE, USERID, accno,pgrswt,pnetwt,pamount,refno)
       VALUES (@vouno, '$rod', '$schName', '$schemeno', '$schAmt', $regNo, '$cash', '$card', '$cardName', '$chitId', '$flag', '$cancel', '$branchId', '$pgrswt', '$schemeId', '$goldRate', '$silverRate', '$userId', '$schemeno' + CAST($regNo AS VARCHAR),$pgrswt,$pnetwt,$pamount,@refno)
     ''';
+*/
 
-      // commonUtils.log.i(query);
+      String query = '''
+      
+DECLARE @vouno INT;
+DECLARE @regno INT = $regNo; -- assign before using
+DECLARE @refno VARCHAR(50) = 'ONLINE' + CAST(@regno AS VARCHAR);
+
+SELECT @vouno = ISNULL(MAX(vouno), 0) + 1 FROM MNTHSCHEME;
+   INSERT INTO MNTHSCHEME (VOUNO, ROD, SCHNAME, SCHCODE, SCHAMT, REGNO, CASH, CARD, CARDNAME, CHITID, FLAG, CANCEL, BRANCHID, METVAL, SCHEMEID, GOLDRATE, SILVERRATE, USERID, accno, pgrswt, pnetwt, pamount, TRANS_ID, STATUS, refno)
+      VALUES (@vouno, '$rod', '$schName', '$schemeno', '$schAmt', @regno, '$cash', '$card', '$cardName', '$chitId', '$flag', '$cancel', '$branchId', '$pgrswt', '$schemeId', '$goldRate', '$silverRate', '$userId', '$schemeno' + CAST(@regno AS VARCHAR), '$pgrswt', '$pnetwt', '$pamount', '$Trans_id', '$status', @refno)
+
+ 
+''';
+
+      commonUtils.log.i(query);
 
       String? result = await sqlService.writeData(query);
+      commonUtils.log.i(result);
       if (result != null) {
         commonUtils.log
             .i('New Scheme Data insert successfully in server: $result');

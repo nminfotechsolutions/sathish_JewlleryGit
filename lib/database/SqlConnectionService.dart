@@ -100,7 +100,6 @@ class SqlConnectionService {
     }
   }
 
-
   Future<String?> writeData(String query) async {
     try {
       if (!_isConnected) {

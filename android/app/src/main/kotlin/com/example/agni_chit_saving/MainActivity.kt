@@ -1,4 +1,4 @@
-package com.agni.agni_chit_saving
+package com.sathish.sathishjewellery
 
 import io.flutter.embedding.android.FlutterActivity
 

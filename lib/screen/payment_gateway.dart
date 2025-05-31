@@ -225,7 +225,7 @@ class _payment_gatewayState extends State<payment_gateway> {
       final album = albumList![0];
 
       //
-      // commonUtils.log.i(album);
+      commonUtils.log.i(album);
       String chitId = album['chitId'] ?? '';
       String schName = album['schemeName'] ?? '';
       String amount = album['schemeAmount'] ?? '';
@@ -318,6 +318,120 @@ class _payment_gatewayState extends State<payment_gateway> {
     }
   }
 
+  Future<void> saveMnthsScheme() async {
+    try {
+      // Get USERID from SharedPreferences
+      String? userid = SharedPreferencesHelper.getString("USERID");
+
+      if (userid == null) {
+        commonUtils.log.i("Error: USERID is null");
+        return;
+      }
+
+      if (albumList == null || albumList!.isEmpty) {
+        commonUtils.log.i("Error: albumList is null or empty");
+        return;
+      }
+
+      // Convert keys of first album item to lowercase for consistent access
+      final album = Map<String, dynamic>.fromEntries(
+        albumList![0].entries.map(
+              (e) => MapEntry(e.key.toString().toLowerCase(), e.value),
+            ),
+      );
+
+      // Extract needed fields safely with defaults
+      String chitId = album['chitid']?.toString() ?? '';
+      String schName = album['schname']?.toString() ?? '';
+      String amount = album['schamt']?.toString() ?? '';
+      String schemeType = album['schemetype']?.toString() ?? '';
+      String schAmt =
+          schemeType == 'WEIGHT' ? (enteredAmount ?? amount) : amount;
+      String schCode = album['schcode']?.toString() ?? '';
+      String noIns = album['noins']?.toString() ?? '';
+      String totalMembers = album['totalmembers']?.toString() ?? '';
+      String regNo = album['regno']?.toString() ?? '';
+      String active = album['status']?.toString() ?? '';
+      String schemeId = album['schemeid']?.toString() ?? '';
+      String branchId = album['branchid']?.toString() ?? '';
+      String metId = album['metid']?.toString() ?? '';
+      String groupcode = album['groupcode']?.toString() ?? '';
+      String schemeno = album['schemeno']?.toString() ?? '';
+
+      String pgrswt = schemeType == 'WEIGHT' ? (enterWeight ?? '0.00') : '0.00';
+      String pnetwt = schemeType == 'WEIGHT' ? '1.00' : '0.00';
+      String pamount =
+          schemeType == 'WEIGHT' ? (enteredAmount ?? '0.00') : '0.00';
+
+      // Build the list to save (only one item)
+      List<MdlJoiningNewScheme> savingSchemeList = [
+        MdlJoiningNewScheme(
+          vouNo: '',
+          jid: commonUtils.formatDateWithYMD(commonUtils.selectedDate) ?? '',
+          schName: schName,
+          schCode: schCode,
+          SCHEMENO: schemeno,
+          schAmt: pamount,
+          regNo: regNo,
+          name: username ?? '',
+          add1: add1 ?? '',
+          add2: add2 ?? '',
+          add3: add3 ?? '',
+          city: '',
+          state: '',
+          country: '',
+          mobNo: mobno ?? '',
+          cash: '0.0',
+          card: pamount,
+          cardName: 'CHITAPP',
+          cardNo: '',
+          cardAmt: '',
+          cheque: '',
+          chequeNo: '',
+          chequeDate: '',
+          chequeAmt: '',
+          mobTran: '',
+          billNo: '',
+          billDate:
+              commonUtils.formatDateWithYMD(commonUtils.selectedDate) ?? '',
+          closeDate: '',
+          accNo: '',
+          flag: 'R',
+          cancel: 'N',
+          branchId: branchId,
+          metId: metId,
+          metval: goldRate?.toString() ?? '0.0',
+          closeBillNo: '',
+          time: '',
+          goldRate: goldRate?.toString() ?? '0.0',
+          silverRate: silverRate?.toString() ?? '0.0',
+          lock: '',
+          remarks: '',
+          nomIni: nomname ?? '',
+          adharNo: aadharno ?? '',
+          rod: commonUtils.formatDateWithYMD(commonUtils.selectedDate) ?? '',
+          chitId: chitId,
+          schemeId: schemeId,
+          userId: userid,
+          groupcode: groupcode,
+          pgrswt: pgrswt,
+          pnetwt: pnetwt,
+          pamount: pamount,
+          REFNO: '',
+        ),
+      ];
+
+      // Call your update/save function
+      await MdlJoiningNewScheme.updateDataFromServerForPayNow(
+          savingSchemeList, transactionId!, status!);
+      Navigator.pop(context, true);
+      Navigator.pushReplacementNamed(
+          context, AppRoutes.CommonBottomnavigationScreen);
+    } catch (e) {
+      commonUtils.log.i("Error in saveNewScheme: $e");
+    }
+  }
+
   Future<void> handlePaymentErrorResponse(
       PaymentFailureResponse response) async {
     transactionId = response.error.toString();
@@ -328,7 +442,7 @@ class _payment_gatewayState extends State<payment_gateway> {
     * 2. Error Description
     * 3. Metadata
     * */
-    // await saveNewScheme();
+    //await saveMnthsScheme();
     // await sendPaymentSuccessSMS(
     //     transactionId!); // Send SMS after payment success
     showAlertDialog(context, "Payment Failed",
@@ -371,7 +485,13 @@ class _payment_gatewayState extends State<payment_gateway> {
     print("Payment Success - Transaction ID: $transactionId");
 
     await sendPaymentSuccessSMS(transactionId!);
-    await saveNewScheme();
+    // await saveNewScheme();
+    String? albumJson = SharedPreferencesHelper.getString('MdlNewScheme');
+    if (albumJson.isNotEmpty) {
+      await saveNewScheme();
+    } else {
+      await saveMnthsScheme();
+    }
   }
 
   Future<void> handleExternalWalletSelected(
@@ -380,7 +500,12 @@ class _payment_gatewayState extends State<payment_gateway> {
     status = "Wallet";
     showAlertDialog(
         context, "External Wallet Selected", "${response.walletName}");
-    await saveNewScheme();
+    String? albumJson = SharedPreferencesHelper.getString('MdlNewScheme');
+    if (albumJson.isNotEmpty) {
+      await saveNewScheme();
+    } else {
+      await saveMnthsScheme();
+    }
   }
 
   Future<void> sendPaymentSuccessSMS(String transactionId) async {

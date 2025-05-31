@@ -24,6 +24,7 @@ class Main_menu extends StatefulWidget {
 class _Main_menuState extends State<Main_menu> {
   String enteredAmount = '';
   MdlNewScheme? selectedScheme;
+  bool _isBottomSheetOpen = false;
   Map<String, MdlNewScheme> selectedSchemes = {};
   String Companyname = '';
   late Future<List<MdlCompanyData>> futureMdlCompanyData;
@@ -122,6 +123,127 @@ class _Main_menuState extends State<Main_menu> {
   }
 
   Future<dynamic> AddCatogorybottom_sheet(
+      BuildContext context, String schemeId) async {
+    if (_isBottomSheetOpen) return;
+    _isBottomSheetOpen = true;
+
+    List<MdlNewScheme> amountSchemes =
+        await MdlNewScheme.fecthdatafromNewScheme();
+    List<MdlNewScheme> filteredSchemes =
+        amountSchemes.where((scheme) => scheme.schemeId == schemeId).toList();
+
+    TextEditingController controller = TextEditingController();
+
+    final result = await showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.7,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                const Text(
+                  "Select Scheme",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: filteredSchemes.isEmpty
+                      ? const Center(
+                          child: Text("No schemes available for this ID"))
+                      : ListView.builder(
+                          itemCount: filteredSchemes.length,
+                          itemBuilder: (context, index) {
+                            MdlNewScheme scheme = filteredSchemes[index];
+
+                            if (scheme.schemeId == "57") {
+                              return Column(
+                                children: [
+                                  TextField(
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w900),
+                                    controller: controller,
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                      prefixIcon: const Icon(
+                                          Icons.currency_rupee_sharp),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 10, horizontal: 20),
+                                      border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15)),
+                                      labelText: "Enter new amount",
+                                    ),
+                                  ),
+                                  const SizedBox(height: 30),
+                                  ElevatedButton(
+                                    style: ButtonStyle(
+                                        backgroundColor: WidgetStatePropertyAll(
+                                            Colors.blue.shade900)),
+                                    onPressed: () {
+                                      String enteredAmount =
+                                          controller.text.trim();
+                                      if (enteredAmount.isNotEmpty) {
+                                        Navigator.pop(context, enteredAmount);
+                                        commonUtils.log.i(enteredAmount);
+                                      } else {
+                                        commonUtils
+                                            .showToast('Please enter amount');
+                                      }
+                                    },
+                                    child: const SizedBox(
+                                      height: 50,
+                                      width: double.infinity,
+                                      child: Center(
+                                          child: Text(
+                                        "Confirm",
+                                        style: TextStyle(color: Colors.white),
+                                      )),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            } else {
+                              return Card(
+                                elevation: 3,
+                                child: ListTile(
+                                  title: Text(
+                                    '₹${scheme.schemeAmount}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 17,
+                                      color: Color(0XFF953130),
+                                    ),
+                                  ),
+                                  subtitle: Text("No.of Ins: ${scheme.noIns}"),
+                                  trailing: Text("Type: ${scheme.schemeType}"),
+                                  onTap: () {
+                                    Navigator.pop(context, scheme);
+                                  },
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    _isBottomSheetOpen = false;
+    return result;
+  }
+
+/*  Future<dynamic> AddCatogorybottom_sheet(
       BuildContext context, String schemeId) async {
     List<MdlNewScheme> amountSchemes =
         await MdlNewScheme.fecthdatafromNewScheme();
@@ -235,7 +357,7 @@ class _Main_menuState extends State<Main_menu> {
         );
       },
     );
-  }
+  }*/
 
   Future<void> _onJoinPressed(MdlNewScheme album) async {
     MdlNewScheme schemeToUse = selectedSchemes[album.schemeId] ?? album;
