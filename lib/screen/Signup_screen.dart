@@ -124,7 +124,6 @@ class _LoginScreenState extends State<login_screen> {
               await checkMobileNumber(_MobilenumberController.text);
           bool EmailExists = await checkEmailid(_EmailController.text);
 
-
           if (mobileExists) {
             commonUtils.showToast("Already This Mobile No Created",
                 backgroundColor: AppColors.CommonRed);

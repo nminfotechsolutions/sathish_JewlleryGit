@@ -165,6 +165,7 @@ class _Main_menuState extends State<Main_menu> {
                               return Column(
                                 children: [
                                   TextField(
+                                    autofocus: true,
                                     style: const TextStyle(
                                         fontWeight: FontWeight.w900),
                                     controller: controller,
@@ -243,127 +244,29 @@ class _Main_menuState extends State<Main_menu> {
     return result;
   }
 
-/*  Future<dynamic> AddCatogorybottom_sheet(
-      BuildContext context, String schemeId) async {
-    List<MdlNewScheme> amountSchemes =
-        await MdlNewScheme.fecthdatafromNewScheme();
-
-    List<MdlNewScheme> filteredSchemes =
-        amountSchemes.where((scheme) => scheme.schemeId == schemeId).toList();
-
-    TextEditingController controller = TextEditingController();
-
-    return showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      isScrollControlled: true,
-      builder: (context) {
-        return FractionallySizedBox(
-          heightFactor: 0.7,
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              children: [
-                const Text(
-                  "Select Scheme",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: filteredSchemes.isEmpty
-                      ? const Center(
-                          child: Text("No schemes available for this ID"))
-                      : ListView.builder(
-                          itemCount: filteredSchemes.length,
-                          itemBuilder: (context, index) {
-                            MdlNewScheme scheme = filteredSchemes[index];
-
-                            if (scheme.schemeId == "57") {
-                              // controller.text = scheme.schemeAmount;
-                              return Column(
-                                children: [
-                                  TextField(
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w900),
-                                    controller: controller,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      prefixIcon: const Icon(
-                                          Icons.currency_rupee_sharp),
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              vertical: 10, horizontal: 20),
-                                      border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15)),
-                                      labelText: "Enter new amount",
-                                    ),
-                                  ),
-                                  const SizedBox(height: 30),
-                                  ElevatedButton(
-                                    style: ButtonStyle(
-                                        backgroundColor: WidgetStatePropertyAll(
-                                            Colors.blue.shade900)),
-                                    onPressed: () {
-                                      String enteredAmount =
-                                          controller.text.trim();
-                                      if (enteredAmount.isNotEmpty) {
-                                        Navigator.pop(context, enteredAmount);
-                                        commonUtils.log.i(enteredAmount);
-                                      } else {
-                                        commonUtils
-                                            .showToast('Please enter amount');
-                                      }
-                                    },
-                                    child: const SizedBox(
-                                        height: 50,
-                                        width: double.infinity,
-                                        child: Center(
-                                            child: Text(
-                                          "Confirm",
-                                          style: TextStyle(color: Colors.white),
-                                        ))),
-                                  ),
-                                ],
-                              );
-                            } else {
-                              return Card(
-                                elevation: 3,
-                                child: ListTile(
-                                  title: Text(
-                                    '₹${scheme.schemeAmount}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 17,
-                                      color: Color(0XFF953130),
-                                    ),
-                                  ),
-                                  subtitle: Text("No.of Ins: ${scheme.noIns}"),
-                                  trailing: Text("Type: ${scheme.schemeType}"),
-                                  onTap: () {
-                                    Navigator.pop(context, scheme);
-                                  },
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }*/
-
   Future<void> _onJoinPressed(MdlNewScheme album) async {
     MdlNewScheme schemeToUse = selectedSchemes[album.schemeId] ?? album;
 
-    await storeData(schemeToUse);
+    // Check if it's daily-based scheme
     bool isDailyOn = schemeToUse.schemeId == "57";
+    String amount = schemeToUse.schemeAmount;
+    // Validation: daily-based amount should not be empty or invalid
+    if (isDailyOn &&
+        (amount == null ||
+            amount.trim().isEmpty ||
+            double.tryParse(amount) == null ||
+            double.tryParse(amount)! <= 0)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid amount for Daily Scheme.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    await storeData(schemeToUse);
+
     Navigator.push(
       context,
       PageRouteBuilder(
@@ -381,6 +284,31 @@ class _Main_menuState extends State<Main_menu> {
       ),
     );
   }
+
+/*  Future<void> _onJoinPressed(MdlNewScheme album) async {
+    MdlNewScheme schemeToUse = selectedSchemes[album.schemeId] ?? album;
+
+    await storeData(schemeToUse);
+
+    bool isDailyOn = schemeToUse.schemeId == "57";
+
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => kyc_screen(
+          readonly: !isDailyOn,
+          schemeType: schemeToUse.schemeName,
+          amount: schemeToUse.schemeAmount,
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+      ),
+    );
+  }*/
 
   Future<void> storeData(MdlNewScheme scheme) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

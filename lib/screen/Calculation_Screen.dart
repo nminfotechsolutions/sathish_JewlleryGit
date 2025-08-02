@@ -7,6 +7,7 @@ import 'package:agni_chit_saving/screen/payment_gateway.dart';
 import 'package:agni_chit_saving/widget/CommonTextSize.dart';
 import 'package:agni_chit_saving/widget/RoundedElevatedButton.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class CalculationScreen extends StatefulWidget {
   final String amount;
@@ -25,6 +26,7 @@ class CalculationScreen extends StatefulWidget {
 class _CalculationScreenScreenState extends State<CalculationScreen> {
   final TextEditingController _weightController = TextEditingController();
   TextEditingController _amountController = TextEditingController();
+  String currentTime = DateFormat('HH:mm:ss').format(DateTime.now());
   MdlNewScheme? album;
   List<Map<String, dynamic>>? albumList;
   String companyName = '';
@@ -149,9 +151,8 @@ class _CalculationScreenScreenState extends State<CalculationScreen> {
   }
 
   void _calculateWeight() {
-    double enterAmount =
-        double.tryParse(widget.amount) ?? 0.0; // Get the passed amount
-    double todayGoldRate = double.parse(goldRate!);
+    double enterAmount = double.tryParse(widget.amount) ?? 0.0;
+    double todayGoldRate = double.parse(goldRate ?? '0');
     double grams = enterAmount / todayGoldRate;
 
     setState(() {
@@ -161,7 +162,7 @@ class _CalculationScreenScreenState extends State<CalculationScreen> {
 
   void onAmountEntered(String text) {
     double EnterAmount = double.parse(_amountController.text);
-    double TodayGodRate = double.parse(goldRate!);
+    double TodayGodRate = double.parse(goldRate ?? '0');
     double grams = EnterAmount / TodayGodRate;
     _weightController.text = grams.toStringAsFixed(3);
   }
@@ -266,6 +267,7 @@ class _CalculationScreenScreenState extends State<CalculationScreen> {
           pnetwt: pnetwt,
           pamount: pamount,
           REFNO: '',
+          TIME: currentTime,
         ),
       ];
 

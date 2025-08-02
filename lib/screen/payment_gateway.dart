@@ -9,6 +9,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class payment_gateway extends StatefulWidget {
   @override
@@ -28,6 +29,7 @@ class _payment_gatewayState extends State<payment_gateway> {
   List<MdlCompanyData> allMdlCompanyData = [];
   List<MdlCompanyData> filteredMdlCompanyData = [];
   MdlNewScheme? album;
+
   List<Map<String, dynamic>>? albumList;
   DateTime? maturityDate;
   DateTime? currentDate;
@@ -155,7 +157,7 @@ class _payment_gatewayState extends State<payment_gateway> {
       if (response.statusCode == 200) {
         var responseData = jsonDecode(response.body);
         String orderId = responseData['id'];
-        return orderId; // Return the order id
+        return orderId;
       } else {
         throw Exception('Failed to create order');
       }
@@ -197,18 +199,6 @@ class _payment_gatewayState extends State<payment_gateway> {
       print('Error creating Razorpay order: $e');
     }
   }
-
-  // String generateReceiptId() {
-  //   DateTime now = DateTime.now();
-  //   String datePart = "${now.year}${_twoDigits(now.month)}${_twoDigits(now.day)}";
-  //   int randomNumber = DateTime.now().microsecond % 10000; // Simple random part
-  //   String runningPart = randomNumber.toString().padLeft(4, '0');
-  //   return "REC-$datePart-$runningPart";
-  // }
-  //
-  // String _twoDigits(int n) {
-  //   return n.toString().padLeft(2, '0');
-  // }
 
   Future<void> saveNewScheme() async {
     String? userid = SharedPreferencesHelper.getString("USERID");
@@ -301,6 +291,7 @@ class _payment_gatewayState extends State<payment_gateway> {
           pnetwt: pnetwt,
           pamount: pamount,
           REFNO: '',
+          TIME: '',
         ),
       ];
 
@@ -418,6 +409,7 @@ class _payment_gatewayState extends State<payment_gateway> {
           pnetwt: pnetwt,
           pamount: pamount,
           REFNO: '',
+          TIME: '',
         ),
       ];
 
@@ -442,56 +434,51 @@ class _payment_gatewayState extends State<payment_gateway> {
     * 2. Error Description
     * 3. Metadata
     * */
-    //await saveMnthsScheme();
+
+    // await saveMnthsScheme();
+    //await saveNewScheme();
     // await sendPaymentSuccessSMS(
     //     transactionId!); // Send SMS after payment success
     showAlertDialog(context, "Payment Failed",
         "Code: ${response.code}\nDescription: ${response.message}\nMetadata:${response.error.toString()}");
   }
 
-  // Future<void> handlePaymentSuccessResponse(
-  //     PaymentSuccessResponse response) async {
-  //   transactionId = response.paymentId;
-  //   status = "Success";
-  //   /*
-  //   * Payment Success Response contains three values:
-  //   * 1. Order ID
-  //   * 2. Payment ID
-  //   * 3. Signature
-  //   * */
-  //   commonUtils.log.i(response.data.toString());
-  //   showAlertDialog(
-  //       context, "Payment Successful", "Payment ID: ${response.paymentId}");
-  //   await sendPaymentSuccessSMS(transactionId); // Send SMS after payment success
-  //   Fluttertoast.showToast(
-  //       msg: "Payment Successful!\nTransaction ID: $transactionId");
-  //   print("Payment Success - Transaction ID: $transactionId");
-  //   await saveNewScheme();
-  // }
-
   Future<void> handlePaymentSuccessResponse(
       PaymentSuccessResponse response) async {
-    transactionId = response.paymentId;
+    transactionId =
+        response.paymentId ?? response.data?["razorpay_payment_id"] ?? "";
     orderId = response.orderId;
     status = "Success";
 
-    commonUtils.log.i(response.data.toString());
-    commonUtils.log.i('Order Id = $orderId');
-    showAlertDialog(
-        context, "Payment Successful", "Payment ID: ${response.paymentId}");
+    commonUtils.log.i("Transaction ID: $transactionId");
+    commonUtils.log.i("Order ID: $orderId");
+    commonUtils.log.i("Full Response: ${response.data}");
 
+    showAlertDialog(
+        context, "Payment Successful", "Payment ID: $transactionId");
     Fluttertoast.showToast(
         msg: "Payment Successful!\nTransaction ID: $transactionId");
-    print("Payment Success - Transaction ID: $transactionId");
+
+    if (transactionId == null || transactionId!.isEmpty) {
+      commonUtils.log.i("Error: Transaction ID is empty.");
+      return;
+    }
 
     await sendPaymentSuccessSMS(transactionId!);
-    // await saveNewScheme();
+
     String? albumJson = SharedPreferencesHelper.getString('MdlNewScheme');
-    if (albumJson.isNotEmpty) {
-      await saveNewScheme();
+    commonUtils.log.i("albumJson: $albumJson");
+
+    if (albumJson != null && albumJson.isNotEmpty) {
+      await saveNewScheme(); // will use transactionId and status
     } else {
       await saveMnthsScheme();
     }
+
+    // Clear after save
+    transactionId = "";
+    status = "";
+    orderId = "";
   }
 
   Future<void> handleExternalWalletSelected(
@@ -548,6 +535,26 @@ class _payment_gatewayState extends State<payment_gateway> {
       commonUtils.log.i("Customer name not found in SharedPreferences!");
     }
   }
+
+  // Future<void> handlePaymentSuccessResponse(
+  //     PaymentSuccessResponse response) async {
+  //   transactionId = response.paymentId;
+  //   status = "Success";
+  //   /*
+  //   * Payment Success Response contains three values:
+  //   * 1. Order ID
+  //   * 2. Payment ID
+  //   * 3. Signature
+  //   * */
+  //   commonUtils.log.i(response.data.toString());
+  //   showAlertDialog(
+  //       context, "Payment Successful", "Payment ID: ${response.paymentId}");
+  //   await sendPaymentSuccessSMS(transactionId); // Send SMS after payment success
+  //   Fluttertoast.showToast(
+  //       msg: "Payment Successful!\nTransaction ID: $transactionId");
+  //   print("Payment Success - Transaction ID: $transactionId");
+  //   await saveNewScheme();
+  // }
 
   void showAlertDialog(BuildContext context, String title, String message) {
     // set up the buttons

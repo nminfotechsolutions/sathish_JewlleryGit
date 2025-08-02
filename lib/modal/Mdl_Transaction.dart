@@ -27,7 +27,7 @@ class MdlTransaction {
       accNo: json['ACCNO']?.toString() ?? '',
       vouno: json['VOUNO'].toString(), // Converts VOUNO (int) to String
       rod: json['ROD']?.toString() ?? '',
-       AMOUNT : json['AMOUNT']?.toString() ?? '',
+      AMOUNT: json['AMOUNT']?.toString() ?? '',
 
       tran_id: json['TRANS_ID'].toString(), // Converts TRANS_ID (int) to String
     );
@@ -54,13 +54,13 @@ FROM
 INNER JOIN 
     NEWSCHEME ON NEWSCHEME.ACCNO = MNTHSCHEME.ACCNO 
 WHERE 
-    MNTHSCHEME.USERID = 2 
+    MNTHSCHEME.USERID = $userid
     AND NEWSCHEME.CANCEL <> 'Y' 
     AND MNTHSCHEME.CANCEL <> 'Y' 
 GROUP BY 
     NEWSCHEME.NAME,MNTHSCHEME.VOUNO,MNTHSCHEME.ROD,NEWSCHEME.ACCNO
 ORDER BY
-ROD;
+ROD desc;
 
     """;
 

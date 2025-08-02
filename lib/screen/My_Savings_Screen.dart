@@ -26,6 +26,7 @@ class MySavingsScreen extends StatefulWidget {
 }
 
 class _MySavingsScreenState extends State<MySavingsScreen> {
+  String currentTime = DateFormat('HH:mm:ss').format(DateTime.now());
   String Companyname = '';
   String? username;
   String? mobno;
@@ -242,6 +243,7 @@ class _MySavingsScreenState extends State<MySavingsScreen> {
           pnetwt: '0.00',
           pamount: '0.00',
           REFNO: '',
+          TIME: currentTime,
         ),
       ];
       await MdlJoiningNewScheme.updateDataFromServerForPayNow(

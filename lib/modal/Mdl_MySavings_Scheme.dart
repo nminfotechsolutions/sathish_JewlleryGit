@@ -222,7 +222,7 @@ GROUP BY
     try {
       String? userid = SharedPreferencesHelper.getString("USERID");
 
-      String query = """
+/*      String query = """
           SELECT  CONVERT(VARCHAR(100),MNTHSCHEME.ROD,105) AS PAID,
           CONVERT(VARCHAR(100),MNTHSCHEME.SCHAMT ,105)AS PAIDAMOUNT ,
           CONVERT(VARCHAR(100),MNTHSCHEME.VOUNO,105)as VOUNO  FROM SCHEME INNER JOIN
@@ -231,7 +231,21 @@ GROUP BY
             INNER JOIN NEWSCHEME ON MNTHSCHEME.ACCNO=NEWSCHEME.ACCNO  
             WHERE MNTHSCHEME.SCHCODE='$Schemco' and MNTHSCHEME.REGNO='$accno' and MNTHSCHEME.CANCEL<>'Y'
              AND NEWSCHEME.CANCEL<>'Y' AND SCHEMETYPE='AMOUNT' ORDER BY ROD  
-           """;
+           """;*/
+
+      String query = """
+   SELECT  CONVERT(VARCHAR(100),MNTHSCHEME.ROD,105) AS PAID,
+          CONVERT(VARCHAR(100),MNTHSCHEME.SCHAMT ,105)AS PAIDAMOUNT ,
+          CONVERT(VARCHAR(100),MNTHSCHEME.VOUNO,105)as VOUNO  FROM SCHEME INNER JOIN
+           MNTHSCHEME ON SCHEME.SCHEMENO=MNTHSCHEME.SCHCODE 
+           INNER JOIN CHITAMOUNT ON MNTHSCHEME.CHITID=CHITAMOUNT.CHITID
+            INNER JOIN NEWSCHEME ON MNTHSCHEME.ACCNO=NEWSCHEME.ACCNO  
+            WHERE MNTHSCHEME.SCHCODE='$Schemco' and MNTHSCHEME.REGNO='$accno' and MNTHSCHEME.CANCEL<>'Y'
+             AND NEWSCHEME.CANCEL<>'Y' AND SCHEMETYPE='AMOUNT' AND (
+    MNTHSCHEME.CARDNAME <> 'CHITAPP' 
+    OR (MNTHSCHEME.CARDNAME = 'CHITAPP' AND ISNULL(CONVERT(VARCHAR(100),MNTHSCHEME.TRANS_ID), '') <> '')
+  ) ORDER BY ROD
+      """;
 
       dynamic results = await service.fetchData(query);
       commonUtils.log.i("Query executed successfully: $query");
@@ -263,11 +277,14 @@ GROUP BY
       String accno, String Schemco) async {
     final SqlConnectionService service = SqlConnectionService();
     // Fluttertoast.showToast(msg: "$accno");
+    commonUtils.log.i(accno);
+    commonUtils.log.i(Schemco);
+    //Fluttertoast.showToast(msg: "$Schemco");
 
     try {
       String? userid = SharedPreferencesHelper.getString("USERID");
 
-      String query = """
+/*      String query = """
       
     
 SELECT  CONVERT(VARCHAR(100),MNTHSCHEME.ROD,105) AS PAID,
@@ -281,7 +298,23 @@ CONVERT(VARCHAR(100),MNTHSCHEME.GOLDRATE,105) as RATE
     WHERE MNTHSCHEME.SCHCODE='$Schemco' and MNTHSCHEME.REGNO='$accno' and MNTHSCHEME.CANCEL<>'Y'
      AND NEWSCHEME.CANCEL<>'Y' AND SCHEMETYPE='WEIGHT' ORDER BY ROD
  
-         """;
+         """;*/
+
+      String query = """
+      SELECT  CONVERT(VARCHAR(100),MNTHSCHEME.ROD,105) AS PAID,
+CONVERT(VARCHAR(100),MNTHSCHEME.SCHAMT ,105)AS PAIDAMOUNT,
+CONVERT(VARCHAR(100),MNTHSCHEME.GOLDRATE,105) as RATE
+  ,CONVERT(VARCHAR(100),MNTHSCHEME.METVAL,105)as WEIGHT ,
+  CONVERT(VARCHAR(100),MNTHSCHEME.VOUNO,105)as VOUNO 
+  FROM SCHEME INNER JOIN MNTHSCHEME ON SCHEME.SCHEMENO=MNTHSCHEME.SCHCODE 
+  INNER JOIN CHITAMOUNT ON MNTHSCHEME.CHITID=CHITAMOUNT.CHITID
+   INNER JOIN NEWSCHEME ON MNTHSCHEME.ACCNO=NEWSCHEME.ACCNO 
+    WHERE MNTHSCHEME.SCHCODE='$Schemco' and MNTHSCHEME.REGNO='$accno' and MNTHSCHEME.CANCEL<>'Y'
+     AND NEWSCHEME.CANCEL<>'Y' AND SCHEMETYPE='WEIGHT'  AND (
+    MNTHSCHEME.CARDNAME <> 'CHITAPP' 
+    OR (MNTHSCHEME.CARDNAME = 'CHITAPP' AND ISNULL(CONVERT(VARCHAR(100),MNTHSCHEME.TRANS_ID), '') <> '')
+) ORDER BY ROD 
+      """;
 
       dynamic results = await service.fetchData(query);
       commonUtils.log.i("Query executed successfully: $query");
