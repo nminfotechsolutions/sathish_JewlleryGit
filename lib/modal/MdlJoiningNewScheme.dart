@@ -212,26 +212,23 @@ class MdlJoiningNewScheme {
       String schemeno = itemData.SCHEMENO;
       String time = itemData.TIME;
 
-
-
-
-     /* String query = """
+      /* String query = """
    DECLARE @vouno INT
       SELECT @vouno = ISNULL(MAX(vouno), 0) + 1 FROM NEWSCHEME
-      
+
       DECLARE @vouno1 INT
       SELECT @vouno1 = ISNULL(MAX(vouno), 0) + 1 FROM MNTHSCHEME
-      
+
       DECLARE @regno INT
       DECLARE @MYOUT TABLE (BILLNO INT)
-      UPDATE SCHEME SET REGNO = REGNO + 1 OUTPUT INSERTED.REGNO INTO @MYOUT WHERE SCHEMENO = '$schemeno' 
+      UPDATE SCHEME SET REGNO = REGNO + 1 OUTPUT INSERTED.REGNO INTO @MYOUT WHERE SCHEMENO = '$schemeno'
       SELECT @regno = BILLNO FROM @MYOUT
-      
+
 
 	  DECLARE @RE TABLE (RNO INT);
 
 
-UPDATE COMPANY 
+UPDATE COMPANY
 SET RNO = RNO + 1
 OUTPUT INSERTED.RNO INTO @RE;
 
@@ -240,7 +237,7 @@ DECLARE @refno VARCHAR(50);
 DECLARE @refno1 VARCHAR(50);
 
 
-SELECT TOP 1 
+SELECT TOP 1
     @refno = 'ONLINE' + CAST(RNO AS VARCHAR),
     @refno1 = 'ONLINE' + CAST(RNO AS VARCHAR)
 FROM @RE;
@@ -248,7 +245,7 @@ DECLARE @time TIME = CONVERT(TIME, GETDATE());
 
       INSERT INTO NEWSCHEME (VOUNO, JID, SCHNAME, SCHCODE, SCHAMT, REGNO, NAME, ADD1, ADD2, ADD3, MOBNO, CASH, CARD, CARDNAME, FLAG, CANCEL, METID, METVAL, GOLDRATE, SILVERRATE, NOMINI, ADHARNO, USERID, accno, refno, [time])
       VALUES (@vouno, '$jid', '$schName', '$schemeno', '$schAmt', @regno, '$name', '$add1', '$add2', '$add3', '$mobNo', '$cash', '$card', '$cardName', '$flag', '$cancel', '$metId', '$pgrswt', '$goldRate', '$silverRate', '$nomIni', '$adharNo', '$userId', '$schemeno' + CAST(@regno AS VARCHAR), @refno, @time)
-      
+
       INSERT INTO MNTHSCHEME (VOUNO, ROD, SCHNAME, SCHCODE, SCHAMT, REGNO, CASH, CARD, CARDNAME, CHITID, FLAG, CANCEL, BRANCHID, METVAL, SCHEMEID, GOLDRATE, SILVERRATE, USERID, accno, pgrswt, pnetwt, pamount, TRANS_ID, STATUS, refno,[time])
       VALUES (@vouno1, '$rod', '$schName', '$schemeno', '$schAmt', @regno, '$cash', '$card', '$cardName', '$chitId', '$flag', '$cancel', '$branchId', '$pgrswt', '$schemeId', '$goldRate', '$silverRate', '$userId', '$schemeno' + CAST(@regno AS VARCHAR), '$pgrswt', '$pnetwt', '$pamount', '$Trans_id', '$status', @refno1,@time)""";*/
 
@@ -367,12 +364,12 @@ DECLARE @time TIME = CONVERT(TIME, GETDATE());
       String query = '''
       DECLARE @vouno INT
       SELECT @vouno = ISNULL(MAX(vouno), 0) + 1 FROM MNTHSCHEME
-      
+
       DECLARE @refno VARCHAR(50) = 'ONLINE' + CAST(@regno AS VARCHAR)
       DECLARE @regno INT = $regNo;
 DECLARE @refno VARCHAR(50) = 'ONLINE' + CAST(@regno AS VARCHAR);
 
- 
+
       INSERT INTO MNTHSCHEME (VOUNO, ROD, SCHNAME, SCHCODE, SCHAMT, REGNO, CASH,CARD,CARDNAME,CHITID, FLAG, CANCEL, BRANCHID, METVAL, SCHEMEID, GOLDRATE, SILVERRATE, USERID, accno,pgrswt,pnetwt,pamount,refno)
       VALUES (@vouno, '$rod', '$schName', '$schemeno', '$schAmt', $regNo, '$cash', '$card', '$cardName', '$chitId', '$flag', '$cancel', '$branchId', '$pgrswt', '$schemeId', '$goldRate', '$silverRate', '$userId', '$schemeno' + CAST($regNo AS VARCHAR),$pgrswt,$pnetwt,$pamount,@refno)
     ''';
@@ -425,6 +422,159 @@ DECLARE @vouno INT;
 
       String? result = await sqlService.writeData(query);
       commonUtils.log.i(result);
+      if (result != null) {
+        commonUtils.log
+            .i('New Scheme Data insert successfully in server: $result');
+      } else {
+        commonUtils.log
+            .e('Failed to insert data for item with id ${itemData.schName}');
+      }
+    }
+  }
+
+  static Future<void> updateDummyDataFromServer(
+      List<MdlJoiningNewScheme> NewJoiningSchemeList,
+      String Trans_id,
+      String status) async {
+    final SqlConnectionService sqlService = SqlConnectionService();
+
+    for (var itemData in NewJoiningSchemeList) {
+      String jid = itemData.jid;
+      String schName = itemData.schName;
+      String schCode = itemData.schCode;
+      String schAmt = itemData.schAmt;
+      String regNo = itemData.regNo;
+      String name = itemData.name;
+      String add1 = itemData.add1;
+      String add2 = itemData.add2;
+      String add3 = itemData.add3;
+      String mobNo = itemData.mobNo;
+      String billDate = itemData.billDate;
+      String closeDate = itemData.closeDate;
+      commonUtils.log.i(closeDate);
+      // DateTime parsedDate = DateFormat('dd-MM-yyyy').parse(closeDate!);
+      // String formattedDate = DateFormat('yyyy-MM-dd').format(parsedDate);
+      String flag = itemData.flag;
+      String cancel = itemData.cancel;
+      String branchId = itemData.branchId;
+      String metId = itemData.metId;
+      String metval = itemData.metval;
+      String goldRate = itemData.goldRate;
+      String silverRate = itemData.silverRate;
+      String nomIni = itemData.nomIni;
+      String adharNo = itemData.adharNo;
+      String rod = itemData.rod;
+      String chitId = itemData.chitId;
+      String schemeId = itemData.schemeId;
+      String userId = itemData.userId;
+      String groupcode = itemData.groupcode;
+      String cash = itemData.cash;
+      String card = itemData.card;
+      String cardName = itemData.cardName;
+      String pgrswt = itemData.pgrswt;
+      String pnetwt = itemData.pnetwt;
+      String pamount = itemData.pamount;
+      String schemeno = itemData.SCHEMENO;
+      String time = itemData.TIME;
+
+      /* String query = """
+   DECLARE @vouno INT
+      SELECT @vouno = ISNULL(MAX(vouno), 0) + 1 FROM NEWSCHEME
+
+      DECLARE @vouno1 INT
+      SELECT @vouno1 = ISNULL(MAX(vouno), 0) + 1 FROM MNTHSCHEME
+
+      DECLARE @regno INT
+      DECLARE @MYOUT TABLE (BILLNO INT)
+      UPDATE SCHEME SET REGNO = REGNO + 1 OUTPUT INSERTED.REGNO INTO @MYOUT WHERE SCHEMENO = '$schemeno'
+      SELECT @regno = BILLNO FROM @MYOUT
+
+
+	  DECLARE @RE TABLE (RNO INT);
+
+
+UPDATE COMPANY
+SET RNO = RNO + 1
+OUTPUT INSERTED.RNO INTO @RE;
+
+
+DECLARE @refno VARCHAR(50);
+DECLARE @refno1 VARCHAR(50);
+
+
+SELECT TOP 1
+    @refno = 'ONLINE' + CAST(RNO AS VARCHAR),
+    @refno1 = 'ONLINE' + CAST(RNO AS VARCHAR)
+FROM @RE;
+DECLARE @time TIME = CONVERT(TIME, GETDATE());
+
+      INSERT INTO NEWSCHEME (VOUNO, JID, SCHNAME, SCHCODE, SCHAMT, REGNO, NAME, ADD1, ADD2, ADD3, MOBNO, CASH, CARD, CARDNAME, FLAG, CANCEL, METID, METVAL, GOLDRATE, SILVERRATE, NOMINI, ADHARNO, USERID, accno, refno, [time])
+      VALUES (@vouno, '$jid', '$schName', '$schemeno', '$schAmt', @regno, '$name', '$add1', '$add2', '$add3', '$mobNo', '$cash', '$card', '$cardName', '$flag', '$cancel', '$metId', '$pgrswt', '$goldRate', '$silverRate', '$nomIni', '$adharNo', '$userId', '$schemeno' + CAST(@regno AS VARCHAR), @refno, @time)
+
+      INSERT INTO MNTHSCHEME (VOUNO, ROD, SCHNAME, SCHCODE, SCHAMT, REGNO, CASH, CARD, CARDNAME, CHITID, FLAG, CANCEL, BRANCHID, METVAL, SCHEMEID, GOLDRATE, SILVERRATE, USERID, accno, pgrswt, pnetwt, pamount, TRANS_ID, STATUS, refno,[time])
+      VALUES (@vouno1, '$rod', '$schName', '$schemeno', '$schAmt', @regno, '$cash', '$card', '$cardName', '$chitId', '$flag', '$cancel', '$branchId', '$pgrswt', '$schemeId', '$goldRate', '$silverRate', '$userId', '$schemeno' + CAST(@regno AS VARCHAR), '$pgrswt', '$pnetwt', '$pamount', '$Trans_id', '$status', @refno1,@time)""";*/
+
+      String query = """
+   DECLARE @vouno INT;
+   SELECT @vouno = ISNULL(MAX(vouno), 0) + 1 FROM NEWSCHEME;
+
+   DECLARE @vouno1 INT;
+   SELECT @vouno1 = ISNULL(MAX(vouno), 0) + 1 FROM MNTHSCHEME;
+
+   DECLARE @regno INT;
+   DECLARE @MYOUT TABLE (BILLNO INT);
+   UPDATE SCHEME 
+   SET REGNO = REGNO + 1 
+   OUTPUT INSERTED.REGNO INTO @MYOUT 
+   WHERE SCHEMENO = '$schemeno';
+   SELECT @regno = BILLNO FROM @MYOUT;
+
+   DECLARE @RE TABLE (RNO INT);
+   UPDATE COMPANY 
+   SET RNO = RNO + 1 
+   OUTPUT INSERTED.RNO INTO @RE;
+
+   DECLARE @refno VARCHAR(50);
+   DECLARE @refno1 VARCHAR(50);
+   SELECT TOP 1 
+       @refno = 'ONLINE' + CAST(RNO AS VARCHAR),
+       @refno1 = 'ONLINE' + CAST(RNO AS VARCHAR)
+   FROM @RE;
+
+   DECLARE @time TIME = CONVERT(TIME, GETDATE());
+
+   INSERT INTO AGTN (
+       VOUNO, JID, SCHNAME, SCHCODE, SCHAMT, REGNO, NAME, ADD1, ADD2, ADD3, MOBNO, 
+       CASH, CARD, CARDNAME, FLAG, CANCEL, METID, METVAL, GOLDRATE, SILVERRATE, 
+       NOMINI, ADHARNO, USERID, accno, refno, [time]
+   ) VALUES (
+       @vouno, '$jid', '$schName', '$schemeno', CAST('$schAmt' AS NUMERIC), @regno, 
+       '$name', '$add1', '$add2', '$add3', '$mobNo', 
+       CAST('$cash' AS NUMERIC), CAST('$card' AS NUMERIC), '$cardName', '$flag', '$cancel', 
+       '$metId', CAST('$pgrswt' AS NUMERIC), CAST('$goldRate' AS NUMERIC), CAST('$silverRate' AS NUMERIC), 
+       '$nomIni', '$adharNo', CAST('$userId' AS INT), '$schemeno' + CAST(@regno AS VARCHAR), 
+       @refno, @time
+   );
+
+   INSERT INTO AGTM (
+       VOUNO, ROD, SCHNAME, SCHCODE, SCHAMT, REGNO, CASH, CARD, CARDNAME, 
+       CHITID, FLAG, CANCEL, BRANCHID, METVAL, SCHEMEID, GOLDRATE, SILVERRATE, 
+       USERID, accno, pgrswt, pnetwt, pamount, 
+       TRANS_ID, STATUS, refno, [time]
+   ) VALUES (
+       @vouno1, '$rod', '$schName', '$schemeno', CAST('$schAmt' AS NUMERIC), @regno, 
+       CAST('$cash' AS NUMERIC), CAST('$card' AS NUMERIC), '$cardName', 
+       '$chitId', '$flag', '$cancel', '$branchId', 
+       CAST('$pgrswt' AS NUMERIC), '$schemeId', CAST('$goldRate' AS NUMERIC), CAST('$silverRate' AS NUMERIC), 
+       CAST('$userId' AS INT), '$schemeno' + CAST(@regno AS VARCHAR), 
+       CAST('$pgrswt' AS NUMERIC), CAST('$pnetwt' AS NUMERIC), CAST('$pamount' AS NUMERIC), 
+       '$Trans_id', '$status', @refno1, @time
+   );
+""";
+
+      commonUtils.log.i(query);
+
+      String? result = await sqlService.writeData(query);
       if (result != null) {
         commonUtils.log
             .i('New Scheme Data insert successfully in server: $result');

@@ -127,7 +127,9 @@ class _payment_gatewayState extends State<payment_gateway> {
           .showToast('Maturity Date has expired! You cannot pay anymore.');
       return;
     } else {
+
       razorPay();
+      saveDummyData();
     }
 
     // saveNewScheme();
@@ -297,6 +299,115 @@ class _payment_gatewayState extends State<payment_gateway> {
 
       await MdlJoiningNewScheme.updateDataFromServer(
           NewSchemeList, transactionId!, status!);
+      // await MdlJoiningNewScheme.updateDataFromServer(NewSchemeList, '1', 'D');
+      Navigator.pop(context, true);
+      Navigator.pushReplacementNamed(
+          context, AppRoutes.CommonBottomnavigationScreen);
+      commonUtils.log.i('transactionId=${transactionId}and status = ${status}');
+      commonUtils.log.i(schCode);
+      commonUtils.log.i(branchId);
+    } catch (e) {
+      commonUtils.log.i("Errors: $e");
+    }
+  }
+
+  Future<void> saveDummyData() async {
+    String? userid = SharedPreferencesHelper.getString("USERID");
+    if (userid == null) {
+      commonUtils.log.i("Error: USERID is null");
+      return;
+    }
+
+    if (albumList == null || albumList!.isEmpty) {
+      commonUtils.log.i("Error: albumList is null or empty");
+      return;
+    }
+    try {
+      final album = albumList![0];
+
+      //
+      commonUtils.log.i(album);
+      String chitId = album['chitId'] ?? '';
+      String schName = album['schemeName'] ?? '';
+      String amount = album['schemeAmount'] ?? '';
+      String schAmt =
+      album['schemeType'] == 'WEIGHT' ? (enteredAmount ?? amount) : amount;
+      String schCode = album['SCHCODE'] ?? '';
+      String noIns = album['noIns'] ?? '';
+      String totalMembers = album['totalMembers'] ?? '';
+      String regNo = album['regNo'] ?? '';
+      String active = album['active'] ?? '';
+      String schemeId = album['schemeId'] ?? '';
+      String branchId = album['branchId'] ?? '';
+      String metId = album['metId'] ?? '';
+      String groupcode = album['groupCode'] ?? '';
+      String schemeType = album['schemeType'] ?? '';
+      String schemeno = album['SCHEMENO'] ?? '';
+
+      String pgrswt = schemeType == 'WEIGHT' ? (enterWeight ?? '0.00') : '0.00';
+      String pnetwt = schemeType == 'WEIGHT' ? '1.00' : '0.00';
+      String pamount =
+      schemeType == 'WEIGHT' ? (enteredAmount ?? '0.00') : '0.00';
+
+      List<MdlJoiningNewScheme> NewSchemeList = [
+        MdlJoiningNewScheme(
+          vouNo: '',
+          jid: commonUtils.formatDateWithYMD(commonUtils.selectedDate) ?? '',
+          schName: schName,
+          schCode: schemeId,
+          SCHEMENO: schemeno,
+          schAmt: schAmt,
+          regNo: regNo,
+          name: username ?? '',
+          add1: add1 ?? '',
+          add2: add2 ?? '',
+          add3: add3 ?? '',
+          city: '',
+          state: '',
+          country: '',
+          mobNo: mobno ?? '',
+          cash: '0.0',
+          card: schAmt,
+          cardName: 'CHITAPP',
+          cardNo: '',
+          cardAmt: '',
+          cheque: '',
+          chequeNo: '',
+          chequeDate: '',
+          chequeAmt: '',
+          mobTran: '',
+          billNo: '',
+          billDate: '',
+          closeDate: '',
+          accNo: '',
+          flag: 'R',
+          cancel: 'N',
+          branchId: branchId,
+          metId: '1',
+          metval: goldRate?.toString() ?? '0.0',
+          closeBillNo: '',
+          time: '',
+          goldRate: goldRate?.toString() ?? '0.0',
+          silverRate: silverRate?.toString() ?? '0.0',
+          lock: '',
+          remarks: '',
+          nomIni: nomname ?? '',
+          adharNo: aadharno ?? '',
+          rod: commonUtils.formatDateWithYMD(commonUtils.selectedDate) ?? '',
+          chitId: chitId,
+          schemeId: schemeId,
+          userId: userid,
+          groupcode: groupcode,
+          pgrswt: pgrswt,
+          pnetwt: pnetwt,
+          pamount: pamount,
+          REFNO: '',
+          TIME: '',
+        ),
+      ];
+
+      await MdlJoiningNewScheme.updateDummyDataFromServer(
+          NewSchemeList, 'transactionId', 'status');
       // await MdlJoiningNewScheme.updateDataFromServer(NewSchemeList, '1', 'D');
       Navigator.pop(context, true);
       Navigator.pushReplacementNamed(
