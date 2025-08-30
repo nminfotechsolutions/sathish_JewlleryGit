@@ -246,8 +246,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -301,7 +299,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.only(top: 180),
               child: ListView(

@@ -26,6 +26,7 @@ class MySavingsScreen extends StatefulWidget {
 }
 
 class _MySavingsScreenState extends State<MySavingsScreen> {
+  String currentTime = DateFormat('HH:mm:ss').format(DateTime.now());
   String Companyname = '';
   String? username;
   String? mobno;
@@ -58,10 +59,8 @@ class _MySavingsScreenState extends State<MySavingsScreen> {
 
   String _formatDate(String date) {
     try {
-      DateTime parsedDate =
-          DateTime.parse(date); // Parse the string to DateTime
-      return DateFormat("dd-MM-yyyy")
-          .format(parsedDate); // Format as DD-MM-YYYY
+      DateTime parsedDate = DateTime.parse(date);
+      return DateFormat("dd-MM-yyyy").format(parsedDate);
     } catch (e) {
       return date; // If parsing fails, return original string
     }
@@ -244,9 +243,11 @@ class _MySavingsScreenState extends State<MySavingsScreen> {
           pnetwt: '0.00',
           pamount: '0.00',
           REFNO: '',
+          TIME: currentTime,
         ),
       ];
-      await MdlJoiningNewScheme.updateDataFromServerForPayNow(NewSchemeList);
+      await MdlJoiningNewScheme.updateDataFromServerForPayNow(
+          NewSchemeList, '', '');
       // Fluttertoast.showToast(msg: "Successfully Paided");
       Navigator.pushReplacementNamed(
           context, AppRoutes.CommonBottomnavigationScreen);
@@ -286,7 +287,6 @@ class _MySavingsScreenState extends State<MySavingsScreen> {
     var Heightscreen = MediaQuery.of(context).size.height;
     var Weightscreen = MediaQuery.of(context).size.width;
     return Scaffold(
-
       key: _scaffoldKey,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(50),
@@ -377,6 +377,7 @@ class _MySavingsScreenState extends State<MySavingsScreen> {
                               filteredMdlNewScheme.isEmpty
                                   ? allNewSchemeData[index]
                                   : filteredMdlNewScheme[index];
+                          commonUtils.log.i(album.SCHNAME);
 
                           String balanceLabel;
                           String displayValue;
@@ -556,7 +557,7 @@ class _MySavingsScreenState extends State<MySavingsScreen> {
                                                           textAlign:
                                                               TextAlign.right,
                                                           _formatDate(album
-                                                              .MATURITY_DATE), // Format the date here
+                                                              .MATURITY_DATE),
                                                           style: Commontextsize
                                                               .CommonMediumSize(),
                                                         ),

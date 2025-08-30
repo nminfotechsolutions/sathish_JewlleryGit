@@ -17,11 +17,12 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
   TextEditingController _MobilenumberController = TextEditingController();
   bool _validateMobNo = false;
   bool isLoading = false;
-/*  Future<void> _sendOtp() async {
+  String OTP = commonUtils.otp;
+  Future<void> _sendOtp() async {
     // otpController.clear();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? CustomerName =
-    prefs.getString('USERNAME'); // Retrieve customer name
+        prefs.getString('USERNAME'); // Retrieve customer name
     String mobileNo = commonUtils.userData['Mobile Number'] ?? '';
     commonUtils.log.i(CustomerName);
     setState(() {
@@ -31,10 +32,8 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
 
     commonUtils.log.i("Your OTP is ${OTP}");
     String baseUrl =
-        'http://pay4sms.in/sendsms/?token=9d70b9201ddeb8ff8228f468a23d424e&credit=2&sender=SATJEW&message=Dear{$CustomerName} Your OTP for SATHISH JEWELLERY DigiGold Registration is {$OTP}Thank You for for Choosing Sathish Thanga Nagai Maligai.&number=$mobileNo&templateid=1707174046630778688';
+        'https://pay4sms.in/sendsms/?token=9d70b9201ddeb8ff8228f468a23d424e&credit=2&sender=SATJEW&message=Dear Customer, your one time SATHISH JEWELLERY DigiGold password $OTP Sathish THANGANAGAI MALIGAI is Authentication Valid upto 3 minutes..&number=$mobileNo&templateid=1707175385913746578';
 
-    // String baseUrl =
-    //     'https://webhooks.wappblaster.com/webhook/66fce4e576f37bade3f6ad4c?number=$mobileNo&message=microotp~$OTP';
     commonUtils.log.i("Your baseUrl is ${baseUrl}");
     try {
       final response = await http.get(Uri.parse(baseUrl));
@@ -47,16 +46,12 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
             context,
             MaterialPageRoute(
                 builder: (context) => OtpScreen(
-                  previousPage: 'ForgetPassword',
-                )));
-      } else {
-
-      }
-    } catch (e) {
-
-    }
-  }*/
-  Future<void> _sendOtp() async {
+                      previousPage: 'ForgetPassword',
+                    )));
+      } else {}
+    } catch (e) {}
+  }
+/*  Future<void> _sendOtp() async {
     String mobileNo = _MobilenumberController.text.trim();
     commonUtils.otp = _generateOtp();
     String baseUrl = "http://www.nminfotech.in/smsautosend.aspx";
@@ -93,7 +88,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
       commonUtils.showToast('An Error Occured',
           backgroundColor: AppColors.CommonRed);
     }
-  }
+  }*/
 
   String _generateOtp() {
     const String chars = '0123456789';

@@ -24,6 +24,7 @@ class Main_menu extends StatefulWidget {
 class _Main_menuState extends State<Main_menu> {
   String enteredAmount = '';
   MdlNewScheme? selectedScheme;
+  bool _isBottomSheetOpen = false;
   Map<String, MdlNewScheme> selectedSchemes = {};
   String Companyname = '';
   late Future<List<MdlCompanyData>> futureMdlCompanyData;
@@ -123,15 +124,17 @@ class _Main_menuState extends State<Main_menu> {
 
   Future<dynamic> AddCatogorybottom_sheet(
       BuildContext context, String schemeId) async {
+    if (_isBottomSheetOpen) return;
+    _isBottomSheetOpen = true;
+
     List<MdlNewScheme> amountSchemes =
         await MdlNewScheme.fecthdatafromNewScheme();
-
     List<MdlNewScheme> filteredSchemes =
         amountSchemes.where((scheme) => scheme.schemeId == schemeId).toList();
 
     TextEditingController controller = TextEditingController();
 
-    return showModalBottomSheet(
+    final result = await showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -159,10 +162,10 @@ class _Main_menuState extends State<Main_menu> {
                             MdlNewScheme scheme = filteredSchemes[index];
 
                             if (scheme.schemeId == "57") {
-                              // controller.text = scheme.schemeAmount;
                               return Column(
                                 children: [
                                   TextField(
+                                    autofocus: true,
                                     style: const TextStyle(
                                         fontWeight: FontWeight.w900),
                                     controller: controller,
@@ -196,13 +199,14 @@ class _Main_menuState extends State<Main_menu> {
                                       }
                                     },
                                     child: const SizedBox(
-                                        height: 50,
-                                        width: double.infinity,
-                                        child: Center(
-                                            child: Text(
-                                          "Confirm",
-                                          style: TextStyle(color: Colors.white),
-                                        ))),
+                                      height: 50,
+                                      width: double.infinity,
+                                      child: Center(
+                                          child: Text(
+                                        "Confirm",
+                                        style: TextStyle(color: Colors.white),
+                                      )),
+                                    ),
                                   ),
                                 ],
                               );
@@ -235,13 +239,34 @@ class _Main_menuState extends State<Main_menu> {
         );
       },
     );
+
+    _isBottomSheetOpen = false;
+    return result;
   }
 
   Future<void> _onJoinPressed(MdlNewScheme album) async {
     MdlNewScheme schemeToUse = selectedSchemes[album.schemeId] ?? album;
 
-    await storeData(schemeToUse);
+    // Check if it's daily-based scheme
     bool isDailyOn = schemeToUse.schemeId == "57";
+    String amount = schemeToUse.schemeAmount;
+    // Validation: daily-based amount should not be empty or invalid
+    if (isDailyOn &&
+        (amount == null ||
+            amount.trim().isEmpty ||
+            double.tryParse(amount) == null ||
+            double.tryParse(amount)! <= 0)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid amount for Daily Scheme.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    await storeData(schemeToUse);
+
     Navigator.push(
       context,
       PageRouteBuilder(
@@ -259,6 +284,31 @@ class _Main_menuState extends State<Main_menu> {
       ),
     );
   }
+
+/*  Future<void> _onJoinPressed(MdlNewScheme album) async {
+    MdlNewScheme schemeToUse = selectedSchemes[album.schemeId] ?? album;
+
+    await storeData(schemeToUse);
+
+    bool isDailyOn = schemeToUse.schemeId == "57";
+
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => kyc_screen(
+          readonly: !isDailyOn,
+          schemeType: schemeToUse.schemeName,
+          amount: schemeToUse.schemeAmount,
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+      ),
+    );
+  }*/
 
   Future<void> storeData(MdlNewScheme scheme) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

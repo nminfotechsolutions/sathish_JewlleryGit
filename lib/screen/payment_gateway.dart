@@ -9,6 +9,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class payment_gateway extends StatefulWidget {
   @override
@@ -20,10 +21,15 @@ class _payment_gatewayState extends State<payment_gateway> {
   // key_id,key_secret
   // rzp_test_4QXEpvReNPfzd9,7n29FL6ICF1Zf9FQ75BWHmpT
 
+  // Sathish Jewellery
+  // key_id,key_secret
+  // rzp_live_hLjGzcUXk1M9tP,ozB11BaY7kfe7A9TvsFajqN4
+
   late Future<List<MdlCompanyData>> futureMdlCompanyData;
   List<MdlCompanyData> allMdlCompanyData = [];
   List<MdlCompanyData> filteredMdlCompanyData = [];
   MdlNewScheme? album;
+
   List<Map<String, dynamic>>? albumList;
   DateTime? maturityDate;
   DateTime? currentDate;
@@ -122,6 +128,7 @@ class _payment_gatewayState extends State<payment_gateway> {
       return;
     } else {
       razorPay();
+      saveDummyData();
     }
 
     // saveNewScheme();
@@ -129,18 +136,18 @@ class _payment_gatewayState extends State<payment_gateway> {
 
   Future<String> createRazorpayOrder(double amount) async {
     var url = Uri.parse('https://api.razorpay.com/v1/orders');
-    String apiKey = 'rzp_test_4QXEpvReNPfzd9';
-    String apiSecret = '7n29FL6ICF1Zf9FQ75BWHmpT';
+    String apiKey = 'rzp_live_hLjGzcUXk1M9tP';
+    String apiSecret = 'ozB11BaY7kfe7A9TvsFajqN4';
 
     // Prepare headers for basic auth
     var headers = {
       'Authorization':
           'Basic ' + base64Encode(utf8.encode('$apiKey:$apiSecret'))
     };
-
+    // String receiptId = generateReceiptId();
     // Prepare body for the order
     var body = jsonEncode({
-      'amount': (amount * 100).toInt(), // Amount in paise
+      'amount': (amount * 100).toInt(),
       'currency': 'INR',
       'payment_capture': 1
     });
@@ -151,7 +158,7 @@ class _payment_gatewayState extends State<payment_gateway> {
       if (response.statusCode == 200) {
         var responseData = jsonDecode(response.body);
         String orderId = responseData['id'];
-        return orderId; // Return the order id
+        return orderId;
       } else {
         throw Exception('Failed to create order');
       }
@@ -170,9 +177,9 @@ class _payment_gatewayState extends State<payment_gateway> {
     }
 
     try {
-      String orderId = await createRazorpayOrder(amount); // Create the order
+      String orderId = await createRazorpayOrder(amount);
       var options = {
-        'key': 'rzp_test_4QXEpvReNPfzd9',
+        'key': 'rzp_live_hLjGzcUXk1M9tP',
         'amount': (amount * 100).toInt(),
         'name': username,
         'description': 'Gold Chits',
@@ -184,9 +191,8 @@ class _payment_gatewayState extends State<payment_gateway> {
           'wallets': ['paytm']
         }
       };
-
-      razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentErrorResponse);
       razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlePaymentSuccessResponse);
+      razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentErrorResponse);
       razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, handleExternalWalletSelected);
       razorpay.open(options);
     } catch (e) {
@@ -209,7 +215,7 @@ class _payment_gatewayState extends State<payment_gateway> {
       final album = albumList![0];
 
       //
-      // commonUtils.log.i(album);
+      commonUtils.log.i(album);
       String chitId = album['chitId'] ?? '';
       String schName = album['schemeName'] ?? '';
       String amount = album['schemeAmount'] ?? '';
@@ -285,6 +291,7 @@ class _payment_gatewayState extends State<payment_gateway> {
           pnetwt: pnetwt,
           pamount: pamount,
           REFNO: '',
+          TIME: '',
         ),
       ];
 
@@ -295,10 +302,234 @@ class _payment_gatewayState extends State<payment_gateway> {
       Navigator.pushReplacementNamed(
           context, AppRoutes.CommonBottomnavigationScreen);
       commonUtils.log.i('transactionId=${transactionId}and status = ${status}');
+      commonUtils.log.i('SChemeCODE=${schCode}');
+      commonUtils.log.i(branchId);
+    } catch (e) {
+      commonUtils.log.i("Errors: $e");
+    }
+  }
+
+  Future<void> saveDummyData() async {
+    String? userid = SharedPreferencesHelper.getString("USERID");
+    if (userid == null) {
+      commonUtils.log.i("Error: USERID is null");
+      return;
+    }
+
+    if (albumList == null || albumList!.isEmpty) {
+      commonUtils.log.i("Error: albumList is null or empty");
+      return;
+    }
+    try {
+      final album = albumList![0];
+
+      //
+      commonUtils.log.i(album);
+      String chitId = album['chitId'] ?? '';
+      String schName = album['schemeName'] ?? '';
+      String amount = album['schemeAmount'] ?? '';
+      String schAmt =
+          album['schemeType'] == 'WEIGHT' ? (enteredAmount ?? amount) : amount;
+      String schCode = album['SCHCODE'] ?? '';
+      String noIns = album['noIns'] ?? '';
+      String totalMembers = album['totalMembers'] ?? '';
+      String regNo = album['regNo'] ?? '';
+      String active = album['active'] ?? '';
+      String schemeId = album['schemeId'] ?? '';
+      String branchId = album['branchId'] ?? '';
+      String metId = album['metId'] ?? '';
+      String groupcode = album['groupCode'] ?? '';
+      String schemeType = album['schemeType'] ?? '';
+      String schemeno = album['SCHEMENO'] ?? '';
+
+      String pgrswt = schemeType == 'WEIGHT' ? (enterWeight ?? '0.00') : '0.00';
+      String pnetwt = schemeType == 'WEIGHT' ? '1.00' : '0.00';
+      String pamount =
+          schemeType == 'WEIGHT' ? (enteredAmount ?? '0.00') : '0.00';
+
+      List<MdlJoiningNewScheme> NewSchemeList = [
+        MdlJoiningNewScheme(
+          vouNo: '',
+          jid: commonUtils.formatDateWithYMD(commonUtils.selectedDate) ?? '',
+          schName: schName,
+          schCode: schemeId,
+          SCHEMENO: schemeno,
+          schAmt: schAmt,
+          regNo: regNo,
+          name: username ?? '',
+          add1: add1 ?? '',
+          add2: add2 ?? '',
+          add3: add3 ?? '',
+          city: '',
+          state: '',
+          country: '',
+          mobNo: mobno ?? '',
+          cash: '0.0',
+          card: schAmt,
+          cardName: 'CHITAPP',
+          cardNo: '',
+          cardAmt: '',
+          cheque: '',
+          chequeNo: '',
+          chequeDate: '',
+          chequeAmt: '',
+          mobTran: '',
+          billNo: '',
+          billDate: '',
+          closeDate: '',
+          accNo: '',
+          flag: 'R',
+          cancel: 'N',
+          branchId: branchId,
+          metId: '1',
+          metval: goldRate?.toString() ?? '0.0',
+          closeBillNo: '',
+          time: '',
+          goldRate: goldRate?.toString() ?? '0.0',
+          silverRate: silverRate?.toString() ?? '0.0',
+          lock: '',
+          remarks: '',
+          nomIni: nomname ?? '',
+          adharNo: aadharno ?? '',
+          rod: commonUtils.formatDateWithYMD(commonUtils.selectedDate) ?? '',
+          chitId: chitId,
+          schemeId: schemeId,
+          userId: userid,
+          groupcode: groupcode,
+          pgrswt: pgrswt,
+          pnetwt: pnetwt,
+          pamount: pamount,
+          REFNO: '',
+          TIME: '',
+        ),
+      ];
+
+      await MdlJoiningNewScheme.updateDummyDataFromServer(
+          NewSchemeList, 'transactionId', 'status');
+      // await MdlJoiningNewScheme.updateDataFromServer(NewSchemeList, '1', 'D');
+      Navigator.pop(context, true);
+      Navigator.pushReplacementNamed(
+          context, AppRoutes.CommonBottomnavigationScreen);
+      commonUtils.log.i('transactionId=${transactionId}and status = ${status}');
       commonUtils.log.i(schCode);
       commonUtils.log.i(branchId);
     } catch (e) {
       commonUtils.log.i("Errors: $e");
+    }
+  }
+
+  Future<void> saveMnthsScheme() async {
+    try {
+      // Get USERID from SharedPreferences
+      String? userid = SharedPreferencesHelper.getString("USERID");
+
+      if (userid == null) {
+        commonUtils.log.i("Error: USERID is null");
+        return;
+      }
+
+      if (albumList == null || albumList!.isEmpty) {
+        commonUtils.log.i("Error: albumList is null or empty");
+        return;
+      }
+
+      // Convert keys of first album item to lowercase for consistent access
+      final album = Map<String, dynamic>.fromEntries(
+        albumList![0].entries.map(
+              (e) => MapEntry(e.key.toString().toLowerCase(), e.value),
+            ),
+      );
+
+      // Extract needed fields safely with defaults
+      String chitId = album['chitid']?.toString() ?? '';
+      String schName = album['schname']?.toString() ?? '';
+      String amount = album['schamt']?.toString() ?? '';
+      String schemeType = album['schemetype']?.toString() ?? '';
+      String schAmt =
+          schemeType == 'WEIGHT' ? (enteredAmount ?? amount) : amount;
+      String schCode = album['schcode']?.toString() ?? '';
+      String noIns = album['noins']?.toString() ?? '';
+      String totalMembers = album['totalmembers']?.toString() ?? '';
+      String regNo = album['regno']?.toString() ?? '';
+      String active = album['status']?.toString() ?? '';
+      String schemeId = album['schemeid']?.toString() ?? '';
+      String branchId = album['branchid']?.toString() ?? '';
+      String metId = album['metid']?.toString() ?? '';
+      String groupcode = album['groupcode']?.toString() ?? '';
+      String schemeno = album['schemeno']?.toString() ?? '';
+
+      String pgrswt = schemeType == 'WEIGHT' ? (enterWeight ?? '0.00') : '0.00';
+      String pnetwt = schemeType == 'WEIGHT' ? '1.00' : '0.00';
+      String pamount =
+          schemeType == 'WEIGHT' ? (enteredAmount ?? '0.00') : '0.00';
+
+      // Build the list to save (only one item)
+      List<MdlJoiningNewScheme> savingSchemeList = [
+        MdlJoiningNewScheme(
+          vouNo: '',
+          jid: commonUtils.formatDateWithYMD(commonUtils.selectedDate) ?? '',
+          schName: schName,
+          schCode: schCode,
+          SCHEMENO: schemeno,
+          schAmt: pamount,
+          regNo: regNo,
+          name: username ?? '',
+          add1: add1 ?? '',
+          add2: add2 ?? '',
+          add3: add3 ?? '',
+          city: '',
+          state: '',
+          country: '',
+          mobNo: mobno ?? '',
+          cash: '0.0',
+          card: pamount,
+          cardName: 'CHITAPP',
+          cardNo: '',
+          cardAmt: '',
+          cheque: '',
+          chequeNo: '',
+          chequeDate: '',
+          chequeAmt: '',
+          mobTran: '',
+          billNo: '',
+          billDate:
+              commonUtils.formatDateWithYMD(commonUtils.selectedDate) ?? '',
+          closeDate: '',
+          accNo: '',
+          flag: 'R',
+          cancel: 'N',
+          branchId: branchId,
+          metId: metId,
+          metval: goldRate?.toString() ?? '0.0',
+          closeBillNo: '',
+          time: '',
+          goldRate: goldRate?.toString() ?? '0.0',
+          silverRate: silverRate?.toString() ?? '0.0',
+          lock: '',
+          remarks: '',
+          nomIni: nomname ?? '',
+          adharNo: aadharno ?? '',
+          rod: commonUtils.formatDateWithYMD(commonUtils.selectedDate) ?? '',
+          chitId: chitId,
+          schemeId: schemeId,
+          userId: userid,
+          groupcode: groupcode,
+          pgrswt: pgrswt,
+          pnetwt: pnetwt,
+          pamount: pamount,
+          REFNO: '',
+          TIME: '',
+        ),
+      ];
+
+      // Call your update/save function
+      await MdlJoiningNewScheme.updateDataFromServerForPayNow(
+          savingSchemeList, transactionId!, status!);
+      Navigator.pop(context, true);
+      Navigator.pushReplacementNamed(
+          context, AppRoutes.CommonBottomnavigationScreen);
+    } catch (e) {
+      commonUtils.log.i("Error in saveNewScheme: $e");
     }
   }
 
@@ -312,59 +543,124 @@ class _payment_gatewayState extends State<payment_gateway> {
     * 2. Error Description
     * 3. Metadata
     * */
+
+    // await saveMnthsScheme();
     // await saveNewScheme();
     // await sendPaymentSuccessSMS(
     //     transactionId!); // Send SMS after payment success
+
+    final url = Uri.parse("https://school.agnisofterp.com/agni/chit/payment");
+
+    final data = [
+      {"TRANSACTIONID": transactionId, "ORDERID": "", "RESPONSECODE": "Error"},
+    ];
+
+    final response1 = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(data),
+    );
+
+    if (response1.statusCode == 200) {}
+
     showAlertDialog(context, "Payment Failed",
         "Code: ${response.code}\nDescription: ${response.message}\nMetadata:${response.error.toString()}");
   }
 
-  // Future<void> handlePaymentSuccessResponse(
-  //     PaymentSuccessResponse response) async {
-  //   transactionId = response.paymentId;
-  //   status = "Success";
-  //   /*
-  //   * Payment Success Response contains three values:
-  //   * 1. Order ID
-  //   * 2. Payment ID
-  //   * 3. Signature
-  //   * */
-  //   commonUtils.log.i(response.data.toString());
-  //   showAlertDialog(
-  //       context, "Payment Successful", "Payment ID: ${response.paymentId}");
-  //   await sendPaymentSuccessSMS(transactionId); // Send SMS after payment success
-  //   Fluttertoast.showToast(
-  //       msg: "Payment Successful!\nTransaction ID: $transactionId");
-  //   print("Payment Success - Transaction ID: $transactionId");
-  //   await saveNewScheme();
-  // }
-
   Future<void> handlePaymentSuccessResponse(
       PaymentSuccessResponse response) async {
-    transactionId = response.paymentId;
+    transactionId =
+        response.paymentId ?? response.data?["razorpay_payment_id"] ?? "";
     orderId = response.orderId;
     status = "Success";
 
-    commonUtils.log.i(response.data.toString());
-    commonUtils.log.i('Order Id = $orderId');
-    showAlertDialog(
-        context, "Payment Successful", "Payment ID: ${response.paymentId}");
+    final url = Uri.parse("https://school.agnisofterp.com/agni/chit/payment");
 
-    Fluttertoast.showToast(
-        msg: "Payment Successful!\nTransaction ID: $transactionId");
-    print("Payment Success - Transaction ID: $transactionId");
+    final data = [
+      {
+        "TRANSACTIONID": transactionId,
+        "ORDERID": "",
+        "RESPONSECODE": "payment"
+      },
+    ];
+
+    final response1 = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(data[0]),
+    );
+
+    if (response1.statusCode == 200) {}
+
+    commonUtils.log.i("Transaction ID: $transactionId");
+    commonUtils.log.i("Order ID: $orderId");
+    commonUtils.log.i("Full Response: ${response.data}");
+
+    if (transactionId == null || transactionId!.isEmpty) {
+      commonUtils.log.i("Error: Transaction ID is empty.");
+      return;
+    }
+    commonUtils.log.i("Full Response111: ${response.data}");
+
+    // showAlertDialog(
+    //     //     context, "Payment Successful", "Payment ID: $transactionId");
+    //     // Fluttertoast.showToast(
+    //     //     msg: "Payment Successful!\nTransaction ID: $transactionId");
+
+    commonUtils.log.i("Full Response222: ${response.data}");
 
     await sendPaymentSuccessSMS(transactionId!);
-    await saveNewScheme();
+    commonUtils.log.i('SChemeCODE=${transactionId}');
+    String? albumJson = SharedPreferencesHelper.getString('MdlNewScheme');
+    commonUtils.log.i("albumJsonllll: $albumJson");
+
+    if (albumJson != null && albumJson.isNotEmpty) {
+      await saveNewScheme();
+    } else {
+      commonUtils.log.i("SaveMnthScheme");
+
+      await saveMnthsScheme();
+    }
+
+    // Clear after save
+    transactionId = "";
+    status = "";
+    orderId = "";
   }
 
   Future<void> handleExternalWalletSelected(
       ExternalWalletResponse response) async {
     transactionId = response.walletName;
     status = "Wallet";
+
+    final url = Uri.parse("https://school.agnisofterp.com/agni/chit/payment");
+
+    final data = [
+      {"TRANSACTIONID": transactionId, "ORDERID": "", "RESPONSECODE": "wallet"},
+    ];
+
+    final response1 = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(data),
+    );
+
+    if (response1.statusCode == 200) {}
+
     showAlertDialog(
         context, "External Wallet Selected", "${response.walletName}");
-    await saveNewScheme();
+    String? albumJson = SharedPreferencesHelper.getString('MdlNewScheme');
+    if (albumJson.isNotEmpty) {
+      await saveNewScheme();
+    } else {
+      await saveMnthsScheme();
+    }
   }
 
   Future<void> sendPaymentSuccessSMS(String transactionId) async {
@@ -407,6 +703,26 @@ class _payment_gatewayState extends State<payment_gateway> {
       commonUtils.log.i("Customer name not found in SharedPreferences!");
     }
   }
+
+  // Future<void> handlePaymentSuccessResponse(
+  //     PaymentSuccessResponse response) async {
+  //   transactionId = response.paymentId;
+  //   status = "Success";
+  //   /*
+  //   * Payment Success Response contains three values:
+  //   * 1. Order ID
+  //   * 2. Payment ID
+  //   * 3. Signature
+  //   * */
+  //   commonUtils.log.i(response.data.toString());
+  //   showAlertDialog(
+  //       context, "Payment Successful", "Payment ID: ${response.paymentId}");
+  //   await sendPaymentSuccessSMS(transactionId); // Send SMS after payment success
+  //   Fluttertoast.showToast(
+  //       msg: "Payment Successful!\nTransaction ID: $transactionId");
+  //   print("Payment Success - Transaction ID: $transactionId");
+  //   await saveNewScheme();
+  // }
 
   void showAlertDialog(BuildContext context, String title, String message) {
     // set up the buttons

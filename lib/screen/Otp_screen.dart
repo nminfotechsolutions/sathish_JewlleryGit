@@ -123,11 +123,12 @@ class _OtpScreenState extends State<OtpScreen> {
     // 'http://bulksms.agnisofterp.com/api/smsapi?key=f4c3e6001753ec62c906f4bab4ad73df&route=2&sender=SMSTRT&number=$mobileNo&sms=Dear valued Customer Your Service Code $OTP For savings scheme. Thanks for choosing AGNISOFT. For Any Support Call - +91 9159152272 -SMSTRT&templateid=1607100000000328064';
 
     commonUtils.log.i("Your OTP is ${OTP}");
+
     String baseUrl =
-        'http://pay4sms.in/sendsms/?token=9d70b9201ddeb8ff8228f468a23d424e&credit=2&sender=SATJEW&message=Dear $CustomerName Your OTP for SATHISH JEWELLERY DigiGold Registration is $OTP Thank You for Choosing Sathish Thanga Nagai Maligai.&number=$mobileNo&templateid=1707174046630778688';
+        'https://pay4sms.in/sendsms/?token=9d70b9201ddeb8ff8228f468a23d424e&credit=2&sender=SATJEW&message=Dear $CustomerName Your OTP for SATHISH JEWELLERY DigiGold Registration is $OTP Thank You for Choosing Sathish Thanga Nagai Maligai.&number=$mobileNo&templateid=1707175385884633368';
 
     // String baseUrl =
-    //     'https://webhooks.wappblaster.com/webhook/66fce4e576f37bade3f6ad4c?number=$mobileNo&message=microotp~$OTP';
+    //     'https://webhooks.wappblaster.com/webhook/66fce4e576f37bade3f6ad4c?number=$mobileNo&message=microotp~$OTP';Dear{#var#} Your OTP for SATHISH JEWELLERY DigiGold Registration is {#var#}Thank You for Choosing Sathish Thanga Nagai Maligai.
     commonUtils.log.i("Your baseUrl is ${baseUrl}");
     try {
       final response = await http.get(Uri.parse(baseUrl));
@@ -258,7 +259,7 @@ class _OtpScreenState extends State<OtpScreen> {
               ),
               TextButton(
                   onPressed: () {
-                    onResendCodeTap();
+                    _sendOtp();
                   },
                   child: Text("Resend Code")),
               SizedBox(

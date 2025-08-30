@@ -7,6 +7,7 @@ import 'package:agni_chit_saving/screen/payment_gateway.dart';
 import 'package:agni_chit_saving/widget/CommonTextSize.dart';
 import 'package:agni_chit_saving/widget/RoundedElevatedButton.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class CalculationScreen extends StatefulWidget {
   final String amount;
@@ -25,6 +26,7 @@ class CalculationScreen extends StatefulWidget {
 class _CalculationScreenScreenState extends State<CalculationScreen> {
   final TextEditingController _weightController = TextEditingController();
   TextEditingController _amountController = TextEditingController();
+  String currentTime = DateFormat('HH:mm:ss').format(DateTime.now());
   MdlNewScheme? album;
   List<Map<String, dynamic>>? albumList;
   String companyName = '';
@@ -149,9 +151,8 @@ class _CalculationScreenScreenState extends State<CalculationScreen> {
   }
 
   void _calculateWeight() {
-    double enterAmount =
-        double.tryParse(widget.amount) ?? 0.0; // Get the passed amount
-    double todayGoldRate = double.parse(goldRate!);
+    double enterAmount = double.tryParse(widget.amount) ?? 0.0;
+    double todayGoldRate = double.parse(goldRate ?? '0');
     double grams = enterAmount / todayGoldRate;
 
     setState(() {
@@ -161,13 +162,14 @@ class _CalculationScreenScreenState extends State<CalculationScreen> {
 
   void onAmountEntered(String text) {
     double EnterAmount = double.parse(_amountController.text);
-    double TodayGodRate = double.parse(goldRate!);
+    double TodayGodRate = double.parse(goldRate ?? '0');
     double grams = EnterAmount / TodayGodRate;
     _weightController.text = grams.toStringAsFixed(3);
   }
 
   Future<void> saveNewScheme() async {
     try {
+      // Get USERID from SharedPreferences
       String? userid = SharedPreferencesHelper.getString("USERID");
 
       if (userid == null) {
@@ -175,43 +177,48 @@ class _CalculationScreenScreenState extends State<CalculationScreen> {
         return;
       }
 
-      // Validate albumList and its first item
       if (albumList == null || albumList!.isEmpty) {
         commonUtils.log.i("Error: albumList is null or empty");
         return;
       }
 
-      final album = albumList![0];
+      // Convert keys of first album item to lowercase for consistent access
+      final album = Map<String, dynamic>.fromEntries(
+        albumList![0].entries.map(
+              (e) => MapEntry(e.key.toString().toLowerCase(), e.value),
+            ),
+      );
 
-      commonUtils.log.i(album);
-
-      String chitId = album['chitId'] ?? '';
-      String schName = album['schemeName'] ?? '';
-      String amount = album['schemeAmount'] ?? '';
+      // Extract needed fields safely with defaults
+      String chitId = album['chitid']?.toString() ?? '';
+      String schName = album['schname']?.toString() ?? '';
+      String amount = album['schamt']?.toString() ?? '';
+      String schemeType = album['schemetype']?.toString() ?? '';
       String schAmt =
-          album['schemeType'] == 'WEIGHT' ? (enteredAmount ?? amount) : amount;
-      String schCode = album['SCHCODE'] ?? '';
-      String noIns = album['noIns'] ?? '';
-      String totalMembers = album['totalMembers'] ?? '';
-      String regNo = album['regNo'] ?? '';
-      String active = album['active'] ?? '';
-      String schemeId = album['schemeId'] ?? '';
-      String branchId = album['branchId'] ?? '';
-      String metId = album['metId'] ?? '';
-      String groupcode = album['groupCode'] ?? '';
-      String schemeType = album['schemeType'] ?? '';
-      String schemeno = album['SCHEMENO'] ?? '';
+          schemeType == 'WEIGHT' ? (enteredAmount ?? amount) : amount;
+      String schCode = album['schcode']?.toString() ?? '';
+      String noIns = album['noins']?.toString() ?? '';
+      String totalMembers = album['totalmembers']?.toString() ?? '';
+      String regNo = album['regno']?.toString() ?? '';
+      String active = album['status']?.toString() ?? '';
+      String schemeId = album['schemeid']?.toString() ?? '';
+      String branchId = album['branchid']?.toString() ?? '';
+      String metId = album['metid']?.toString() ?? '';
+      String groupcode = album['groupcode']?.toString() ?? '';
+      String schemeno = album['schemeno']?.toString() ?? '';
 
+      // From your controllers or other UI fields
       String pgrswt = _weightController.text;
       String pnetwt = '1';
       String pamount = _amountController.text;
 
-      List<MdlJoiningNewScheme> SavingSchemeList = [
+      // Build the list to save (only one item)
+      List<MdlJoiningNewScheme> savingSchemeList = [
         MdlJoiningNewScheme(
           vouNo: '',
           jid: commonUtils.formatDateWithYMD(commonUtils.selectedDate) ?? '',
           schName: schName,
-          schCode: schemeId,
+          schCode: schCode,
           SCHEMENO: schemeno,
           schAmt: pamount,
           regNo: regNo,
@@ -260,18 +267,15 @@ class _CalculationScreenScreenState extends State<CalculationScreen> {
           pnetwt: pnetwt,
           pamount: pamount,
           REFNO: '',
+          TIME: currentTime,
         ),
       ];
 
-      await MdlJoiningNewScheme.updateDataFromServerForPayNow(SavingSchemeList);
-      Navigator.pop(context, true);
-      Navigator.pushReplacementNamed(
-          context, AppRoutes.CommonBottomnavigationScreen);
-      // commonUtils.log.i(schName);
-      // commonUtils.log.i(schCode);
-      // commonUtils.log.i(branchId);
+      // Call your update/save function
+      await MdlJoiningNewScheme.updateDataFromServerForPayNow(
+          savingSchemeList, '', '');
     } catch (e) {
-      commonUtils.log.i("Error: $e");
+      commonUtils.log.i("Error in saveNewScheme: $e");
     }
   }
 
@@ -299,6 +303,9 @@ class _CalculationScreenScreenState extends State<CalculationScreen> {
     //   saveNewScheme();
     // }
   }
+  // Future<void> onPayNowPressed() async {
+  //   saveNewScheme();
+  // }
 
   Future<void> storeData() async {
     await SharedPreferencesHelper.saveString(
