@@ -300,9 +300,9 @@ DECLARE @time TIME = CONVERT(TIME, GETDATE());
        @vouno1, '$rod', '$schName', '$schemeno', CAST('$schAmt' AS NUMERIC), @regno, 
        CAST('$cash' AS NUMERIC), CAST('$card' AS NUMERIC), '$cardName', 
        '$chitId', '$flag', '$cancel', '$branchId', 
-       CAST('$pgrswt' AS NUMERIC), '$schemeId', CAST('$goldRate' AS NUMERIC), CAST('$silverRate' AS NUMERIC), 
+       '$metval' , '$schemeId', CAST('$goldRate' AS NUMERIC), CAST('$silverRate' AS NUMERIC), 
        CAST('$userId' AS INT), '$schemeno' + CAST(@regno AS VARCHAR), 
-       CAST('$pgrswt' AS NUMERIC), CAST('$pnetwt' AS NUMERIC), CAST('$pamount' AS NUMERIC), 
+       $pgrswt, CAST('$pnetwt' AS NUMERIC), CAST('$pamount' AS NUMERIC), 
        '$Trans_id', '$status', @refno1, @time
    );
 """;
@@ -418,6 +418,7 @@ DECLARE @vouno INT;
     VALUES (@vouno, '$rod', '$schName', '$schemeno', '$schAmt', @regno, '$cash', '$card', '$cardName', '$chitId', '$flag', '$cancel', '$branchId', '$pgrswt', '$schemeId', '$goldRate', '$silverRate', '$userId', '$schemeno' + CAST(@regno AS VARCHAR), '$pgrswt', '$pnetwt', '$pamount', '$Trans_id', '$status', @refno)
 */
 
+      print(query + 'aaaaaaaaaaaaaaaa');
       commonUtils.log.i(query);
 
       String? result = await sqlService.writeData(query);
@@ -567,7 +568,7 @@ DECLARE @time TIME = CONVERT(TIME, GETDATE());
        '$chitId', '$flag', '$cancel', '$branchId', 
        CAST('$pgrswt' AS NUMERIC), '$schemeId', CAST('$goldRate' AS NUMERIC), CAST('$silverRate' AS NUMERIC), 
        CAST('$userId' AS INT), '$schemeno' + CAST(@regno AS VARCHAR), 
-       CAST('$pgrswt' AS NUMERIC), CAST('$pnetwt' AS NUMERIC), CAST('$pamount' AS NUMERIC), 
+       $pgrswt, CAST('$pnetwt' AS NUMERIC), CAST('$pamount' AS NUMERIC), 
        '$Trans_id', '$status', @refno1, @time
    );
 """;

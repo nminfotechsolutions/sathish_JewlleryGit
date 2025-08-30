@@ -99,7 +99,7 @@ class MdlNewScheme {
     final SqlConnectionService sqlService = SqlConnectionService();
     try {
       String querry = """
-      SELECT 
+      SELECT
         CAST(CHITID AS VARCHAR(255)) AS CHITID,
         CAST(SCHEMENAME AS VARCHAR(255)) AS SCHEMENAME,
         CAST(AMOUNT AS VARCHAR(255)) AS AMOUNT,
@@ -120,7 +120,7 @@ class MdlNewScheme {
       """;
 
       dynamic results = await sqlService.fetchData(querry);
-      commonUtils.log.i('Query: $querry');
+      commonUtils.log.i('Query1: $querry');
 
       if (results != null) {
         List<Map<String, dynamic>> jsonResult = [];

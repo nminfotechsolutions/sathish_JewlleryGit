@@ -127,7 +127,6 @@ class _payment_gatewayState extends State<payment_gateway> {
           .showToast('Maturity Date has expired! You cannot pay anymore.');
       return;
     } else {
-
       razorPay();
       saveDummyData();
     }
@@ -178,7 +177,7 @@ class _payment_gatewayState extends State<payment_gateway> {
     }
 
     try {
-      String orderId = await createRazorpayOrder(amount); // Create the order
+      String orderId = await createRazorpayOrder(amount);
       var options = {
         'key': 'rzp_live_hLjGzcUXk1M9tP',
         'amount': (amount * 100).toInt(),
@@ -192,9 +191,8 @@ class _payment_gatewayState extends State<payment_gateway> {
           'wallets': ['paytm']
         }
       };
-
-      razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentErrorResponse);
       razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlePaymentSuccessResponse);
+      razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentErrorResponse);
       razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, handleExternalWalletSelected);
       razorpay.open(options);
     } catch (e) {
@@ -304,7 +302,7 @@ class _payment_gatewayState extends State<payment_gateway> {
       Navigator.pushReplacementNamed(
           context, AppRoutes.CommonBottomnavigationScreen);
       commonUtils.log.i('transactionId=${transactionId}and status = ${status}');
-      commonUtils.log.i(schCode);
+      commonUtils.log.i('SChemeCODE=${schCode}');
       commonUtils.log.i(branchId);
     } catch (e) {
       commonUtils.log.i("Errors: $e");
@@ -331,7 +329,7 @@ class _payment_gatewayState extends State<payment_gateway> {
       String schName = album['schemeName'] ?? '';
       String amount = album['schemeAmount'] ?? '';
       String schAmt =
-      album['schemeType'] == 'WEIGHT' ? (enteredAmount ?? amount) : amount;
+          album['schemeType'] == 'WEIGHT' ? (enteredAmount ?? amount) : amount;
       String schCode = album['SCHCODE'] ?? '';
       String noIns = album['noIns'] ?? '';
       String totalMembers = album['totalMembers'] ?? '';
@@ -347,7 +345,7 @@ class _payment_gatewayState extends State<payment_gateway> {
       String pgrswt = schemeType == 'WEIGHT' ? (enterWeight ?? '0.00') : '0.00';
       String pnetwt = schemeType == 'WEIGHT' ? '1.00' : '0.00';
       String pamount =
-      schemeType == 'WEIGHT' ? (enteredAmount ?? '0.00') : '0.00';
+          schemeType == 'WEIGHT' ? (enteredAmount ?? '0.00') : '0.00';
 
       List<MdlJoiningNewScheme> NewSchemeList = [
         MdlJoiningNewScheme(
@@ -547,9 +545,26 @@ class _payment_gatewayState extends State<payment_gateway> {
     * */
 
     // await saveMnthsScheme();
-    //await saveNewScheme();
+    // await saveNewScheme();
     // await sendPaymentSuccessSMS(
     //     transactionId!); // Send SMS after payment success
+
+    final url = Uri.parse("https://school.agnisofterp.com/agni/chit/payment");
+
+    final data = [
+      {"TRANSACTIONID": transactionId, "ORDERID": "", "RESPONSECODE": "Error"},
+    ];
+
+    final response1 = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(data),
+    );
+
+    if (response1.statusCode == 200) {}
+
     showAlertDialog(context, "Payment Failed",
         "Code: ${response.code}\nDescription: ${response.message}\nMetadata:${response.error.toString()}");
   }
@@ -561,28 +576,53 @@ class _payment_gatewayState extends State<payment_gateway> {
     orderId = response.orderId;
     status = "Success";
 
+    final url = Uri.parse("https://school.agnisofterp.com/agni/chit/payment");
+
+    final data = [
+      {
+        "TRANSACTIONID": transactionId,
+        "ORDERID": "",
+        "RESPONSECODE": "payment"
+      },
+    ];
+
+    final response1 = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(data[0]),
+    );
+
+    if (response1.statusCode == 200) {}
+
     commonUtils.log.i("Transaction ID: $transactionId");
     commonUtils.log.i("Order ID: $orderId");
     commonUtils.log.i("Full Response: ${response.data}");
-
-    showAlertDialog(
-        context, "Payment Successful", "Payment ID: $transactionId");
-    Fluttertoast.showToast(
-        msg: "Payment Successful!\nTransaction ID: $transactionId");
 
     if (transactionId == null || transactionId!.isEmpty) {
       commonUtils.log.i("Error: Transaction ID is empty.");
       return;
     }
+    commonUtils.log.i("Full Response111: ${response.data}");
+
+    // showAlertDialog(
+    //     //     context, "Payment Successful", "Payment ID: $transactionId");
+    //     // Fluttertoast.showToast(
+    //     //     msg: "Payment Successful!\nTransaction ID: $transactionId");
+
+    commonUtils.log.i("Full Response222: ${response.data}");
 
     await sendPaymentSuccessSMS(transactionId!);
-
+    commonUtils.log.i('SChemeCODE=${transactionId}');
     String? albumJson = SharedPreferencesHelper.getString('MdlNewScheme');
-    commonUtils.log.i("albumJson: $albumJson");
+    commonUtils.log.i("albumJsonllll: $albumJson");
 
     if (albumJson != null && albumJson.isNotEmpty) {
-      await saveNewScheme(); // will use transactionId and status
+      await saveNewScheme();
     } else {
+      commonUtils.log.i("SaveMnthScheme");
+
       await saveMnthsScheme();
     }
 
@@ -596,6 +636,23 @@ class _payment_gatewayState extends State<payment_gateway> {
       ExternalWalletResponse response) async {
     transactionId = response.walletName;
     status = "Wallet";
+
+    final url = Uri.parse("https://school.agnisofterp.com/agni/chit/payment");
+
+    final data = [
+      {"TRANSACTIONID": transactionId, "ORDERID": "", "RESPONSECODE": "wallet"},
+    ];
+
+    final response1 = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(data),
+    );
+
+    if (response1.statusCode == 200) {}
+
     showAlertDialog(
         context, "External Wallet Selected", "${response.walletName}");
     String? albumJson = SharedPreferencesHelper.getString('MdlNewScheme');
