@@ -94,7 +94,7 @@ class _SigninScreenState extends State<SigninScreen> {
 
   void _onchanged(String value) {
     String Mobno = _EmailandphnController.text;
-
+gt
     if (Mobno.length > 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
