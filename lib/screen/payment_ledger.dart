@@ -1,3 +1,4 @@
+import 'package:agni_chit_saving/constants/app_loader.dart';
 import 'package:agni_chit_saving/modal/Mdl_Transaction.dart';
 import 'package:agni_chit_saving/routes/app_export.dart';
 import 'package:agni_chit_saving/widget/CommonDrawer.dart';
@@ -72,7 +73,7 @@ class _payment_ledgerState extends State<payment_ledger> {
                 future: FutureMySavings,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return Center(child: AppLoader.circularProgress());
                   } else if (snapshot.hasError) {
                     return Center(child: Text("Error: ${snapshot.error}"));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -81,67 +82,71 @@ class _payment_ledgerState extends State<payment_ledger> {
 
                   List<MdlTransaction> ledgerList = snapshot.data!;
 
-                  return ListView.builder(
-                    itemCount: ledgerList.length,
-                    itemBuilder: (context, index) {
-                      var item = ledgerList[index];
-                      commonUtils.log.i(item);
-                      return Card(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16)),
-                        child: ListTile(
-                          title: Text(
-                            item.name.toUpperCase(),
-                            style: TextStyle(
-                                color: Colors.grey.shade900,
-                                fontWeight: FontWeight.w600),
-                          ),
-                          subtitle: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "VNO : ${item.vouno}",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.redAccent.shade100,
-                                        fontSize: 12),
-                                  ),
-                                  Text(
-                                    "RS : ${item.AMOUNT}",
-                                    style: TextStyle(
-                                        color: Colors.blue.shade900,
-                                        fontWeight: FontWeight.w900),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text("PAID DATE: ${item.rod}",
-                                        style: TextStyle(
-                                          color: Colors.teal.shade800,
+                  return RefreshIndicator(
+                    onRefresh: _fetchNewSchemeData,
+                    child: ListView.builder(
+                      physics: BouncingScrollPhysics(),
+                      itemCount: ledgerList.length,
+                      itemBuilder: (context, index) {
+                        var item = ledgerList[index];
+                        commonUtils.log.i(item);
+                        return Card(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                          child: ListTile(
+                            title: Text(
+                              item.name.toUpperCase(),
+                              style: TextStyle(
+                                  color: Colors.grey.shade900,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                            subtitle: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "VNO : ${item.vouno}",
+                                      style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                        )),
-                                  ),
-                                  Spacer(),
-                                  Expanded(
-                                    child: Text("Id : ${item.tran_id}",
-                                        style: TextStyle(
-                                            color: Colors.grey.shade700)),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                          color: Colors.redAccent.shade100,
+                                          fontSize: 12),
+                                    ),
+                                    Text(
+                                      "RS : ${item.AMOUNT}",
+                                      style: TextStyle(
+                                          color: Colors.blue.shade900,
+                                          fontWeight: FontWeight.w900),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text("PAID DATE: ${item.rod}",
+                                          style: TextStyle(
+                                            color: Colors.teal.shade800,
+                                            fontWeight: FontWeight.bold,
+                                          )),
+                                    ),
+                                    Spacer(),
+                                    Expanded(
+                                      child: Text("Id : ${item.tran_id}",
+                                          style: TextStyle(
+                                              color: Colors.grey.shade700)),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   );
                 },
               ),

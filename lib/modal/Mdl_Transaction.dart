@@ -8,7 +8,6 @@ class MdlTransaction {
   String name;
   String rod;
   String vouno;
-
   String tran_id;
   String AMOUNT;
   String accNo;
