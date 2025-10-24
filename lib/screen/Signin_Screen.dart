@@ -247,7 +247,7 @@ class _SigninScreenState extends State<SigninScreen> {
                       ],
                     ),
                     Text(
-                      'version 5.0',
+                      'version 6.1',
                       style: commonTextStyleSmall(color: AppColors.CommonGrey),
                     )
                   ],

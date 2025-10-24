@@ -172,7 +172,7 @@ class _schemeLedgerState extends State<schemeLedger> {
                     ],
                   ),
                 ),
-                Expanded(
+                /*       Expanded(
                   child: SingleChildScrollView(
                     scrollDirection:
                         Axis.horizontal, // Enables horizontal scrolling
@@ -201,6 +201,42 @@ class _schemeLedgerState extends State<schemeLedger> {
                           // DataCell(Text(item['SCHEMENO'] ?? '')),
                         ]);
                       }).toList(),
+                    ),
+                  ),
+                ),*/
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: Column(
+                        children: [
+                          DataTable(
+                            columns: [
+                              const DataColumn(label: Text('VOUNO')),
+                              if (widget.schemeType == 'WEIGHT')
+                                const DataColumn(label: Text('WEIGHT')),
+                              const DataColumn(label: Text('PAID DATE')),
+                              const DataColumn(label: Text('PAID AMOUNT')),
+                              if (widget.schemeType == 'WEIGHT')
+                                const DataColumn(label: Text('GOLD RATE')),
+                            ],
+                            rows: snapshot.data!.map((item) {
+                              return DataRow(
+                                cells: [
+                                  DataCell(Text(item['VOUNO'] ?? '')),
+                                  if (widget.schemeType == 'WEIGHT')
+                                    DataCell(Text(item['WEIGHT'] ?? '')),
+                                  DataCell(Text(item['PAID'] ?? '')),
+                                  DataCell(Text(item['PAIDAMOUNT'] ?? '')),
+                                  if (widget.schemeType == 'WEIGHT')
+                                    DataCell(Text(item['RATE'] ?? '')),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

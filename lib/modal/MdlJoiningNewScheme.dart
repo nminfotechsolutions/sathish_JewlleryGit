@@ -211,44 +211,20 @@ class MdlJoiningNewScheme {
       String pamount = itemData.pamount;
       String schemeno = itemData.SCHEMENO;
       String time = itemData.TIME;
-
-      /* String query = """
-   DECLARE @vouno INT
-      SELECT @vouno = ISNULL(MAX(vouno), 0) + 1 FROM NEWSCHEME
-
-      DECLARE @vouno1 INT
-      SELECT @vouno1 = ISNULL(MAX(vouno), 0) + 1 FROM MNTHSCHEME
-
-      DECLARE @regno INT
-      DECLARE @MYOUT TABLE (BILLNO INT)
-      UPDATE SCHEME SET REGNO = REGNO + 1 OUTPUT INSERTED.REGNO INTO @MYOUT WHERE SCHEMENO = '$schemeno'
-      SELECT @regno = BILLNO FROM @MYOUT
-
-
-	  DECLARE @RE TABLE (RNO INT);
-
-
-UPDATE COMPANY
-SET RNO = RNO + 1
-OUTPUT INSERTED.RNO INTO @RE;
-
-
-DECLARE @refno VARCHAR(50);
-DECLARE @refno1 VARCHAR(50);
-
-
-SELECT TOP 1
-    @refno = 'ONLINE' + CAST(RNO AS VARCHAR),
-    @refno1 = 'ONLINE' + CAST(RNO AS VARCHAR)
-FROM @RE;
-DECLARE @time TIME = CONVERT(TIME, GETDATE());
-
-      INSERT INTO NEWSCHEME (VOUNO, JID, SCHNAME, SCHCODE, SCHAMT, REGNO, NAME, ADD1, ADD2, ADD3, MOBNO, CASH, CARD, CARDNAME, FLAG, CANCEL, METID, METVAL, GOLDRATE, SILVERRATE, NOMINI, ADHARNO, USERID, accno, refno, [time])
-      VALUES (@vouno, '$jid', '$schName', '$schemeno', '$schAmt', @regno, '$name', '$add1', '$add2', '$add3', '$mobNo', '$cash', '$card', '$cardName', '$flag', '$cancel', '$metId', '$pgrswt', '$goldRate', '$silverRate', '$nomIni', '$adharNo', '$userId', '$schemeno' + CAST(@regno AS VARCHAR), @refno, @time)
-
-      INSERT INTO MNTHSCHEME (VOUNO, ROD, SCHNAME, SCHCODE, SCHAMT, REGNO, CASH, CARD, CARDNAME, CHITID, FLAG, CANCEL, BRANCHID, METVAL, SCHEMEID, GOLDRATE, SILVERRATE, USERID, accno, pgrswt, pnetwt, pamount, TRANS_ID, STATUS, refno,[time])
-      VALUES (@vouno1, '$rod', '$schName', '$schemeno', '$schAmt', @regno, '$cash', '$card', '$cardName', '$chitId', '$flag', '$cancel', '$branchId', '$pgrswt', '$schemeId', '$goldRate', '$silverRate', '$userId', '$schemeno' + CAST(@regno AS VARCHAR), '$pgrswt', '$pnetwt', '$pamount', '$Trans_id', '$status', @refno1,@time)""";*/
-
+/*   INSERT INTO MNTHSCHEME (
+       VOUNO, ROD, SCHNAME, SCHCODE, SCHAMT, REGNO, CASH, CARD, CARDNAME,
+       CHITID, FLAG, CANCEL, BRANCHID, METVAL, SCHEMEID, GOLDRATE, SILVERRATE,
+       USERID, accno, pgrswt, pnetwt, pamount,
+       TRANS_ID, STATUS, refno, [time]
+   ) VALUES (
+       @vouno1, '$rod', '$schName', '$schemeno', CAST('$schAmt' AS NUMERIC), @regno,
+       CAST('$cash' AS NUMERIC), CAST('$card' AS NUMERIC), '$cardName',
+       '$chitId', '$flag', '$cancel', '$branchId',
+       '$metval' , '$schemeId', CAST('$goldRate' AS NUMERIC), CAST('$silverRate' AS NUMERIC),
+       CAST('$userId' AS INT), '$schemeno' + CAST(@regno AS VARCHAR),
+       $pgrswt, CAST('$pnetwt' AS NUMERIC), CAST('$pamount' AS NUMERIC),
+       '$Trans_id', '$status', @refno1, @time
+   );*/
       String query = """
    DECLARE @vouno INT;
    SELECT @vouno = ISNULL(MAX(vouno), 0) + 1 FROM NEWSCHEME;
@@ -277,6 +253,8 @@ DECLARE @time TIME = CONVERT(TIME, GETDATE());
    FROM @RE;
 
    DECLARE @time TIME = CONVERT(TIME, GETDATE());
+DECLARE @accno VARCHAR(50);
+SET @accno = '$schemeno' + CAST(@regno AS VARCHAR);
 
    INSERT INTO NEWSCHEME (
        VOUNO, JID, SCHNAME, SCHCODE, SCHAMT, REGNO, NAME, ADD1, ADD2, ADD3, MOBNO, 
@@ -291,20 +269,11 @@ DECLARE @time TIME = CONVERT(TIME, GETDATE());
        @refno, @time
    );
 
-   INSERT INTO MNTHSCHEME (
-       VOUNO, ROD, SCHNAME, SCHCODE, SCHAMT, REGNO, CASH, CARD, CARDNAME, 
-       CHITID, FLAG, CANCEL, BRANCHID, METVAL, SCHEMEID, GOLDRATE, SILVERRATE, 
-       USERID, accno, pgrswt, pnetwt, pamount, 
-       TRANS_ID, STATUS, refno, [time]
-   ) VALUES (
-       @vouno1, '$rod', '$schName', '$schemeno', CAST('$schAmt' AS NUMERIC), @regno, 
-       CAST('$cash' AS NUMERIC), CAST('$card' AS NUMERIC), '$cardName', 
-       '$chitId', '$flag', '$cancel', '$branchId', 
-       '$metval' , '$schemeId', CAST('$goldRate' AS NUMERIC), CAST('$silverRate' AS NUMERIC), 
-       CAST('$userId' AS INT), '$schemeno' + CAST(@regno AS VARCHAR), 
-       $pgrswt, CAST('$pnetwt' AS NUMERIC), CAST('$pamount' AS NUMERIC), 
-       '$Trans_id', '$status', @refno1, @time
-   );
+   EXEC dbo.MNTH_ENTRY @VOUNO = @vouno,@ROD = '$rod',@SCHNAME = '$schName',@SCHCODE = '$schemeno',@SCHAMT = '$schAmt',@REGNO = @regno,@CASH = '$cash',
+   @CARD = '$card',@CARDNAME = '$cardName', @CHITID = '$chitId',@FLAG = '$flag',@CANCEL = '$cancel',@BRANCHID = '$branchId',
+   @METVAL = '$metval',@SCHEMEID = '$schemeId',@GOLDRATE = '$goldRate',@SILVERRATE = '$silverRate',@USERID = '$userId',
+   @accno = @accno,@pgrswt = '$pgrswt',@pnetwt = '$pnetwt',@pamount = '$pamount',@TRANS_ID = '$Trans_id',@STATUS = '$status',@refno = @refno1
+   
 """;
 
       commonUtils.log.i(query);
@@ -360,21 +329,6 @@ DECLARE @time TIME = CONVERT(TIME, GETDATE());
       String pamount = itemData.pamount;
       String schemeno = itemData.schCode;
 
-/*
-      String query = '''
-      DECLARE @vouno INT
-      SELECT @vouno = ISNULL(MAX(vouno), 0) + 1 FROM MNTHSCHEME
-
-      DECLARE @refno VARCHAR(50) = 'ONLINE' + CAST(@regno AS VARCHAR)
-      DECLARE @regno INT = $regNo;
-DECLARE @refno VARCHAR(50) = 'ONLINE' + CAST(@regno AS VARCHAR);
-
-
-      INSERT INTO MNTHSCHEME (VOUNO, ROD, SCHNAME, SCHCODE, SCHAMT, REGNO, CASH,CARD,CARDNAME,CHITID, FLAG, CANCEL, BRANCHID, METVAL, SCHEMEID, GOLDRATE, SILVERRATE, USERID, accno,pgrswt,pnetwt,pamount,refno)
-      VALUES (@vouno, '$rod', '$schName', '$schemeno', '$schAmt', $regNo, '$cash', '$card', '$cardName', '$chitId', '$flag', '$cancel', '$branchId', '$pgrswt', '$schemeId', '$goldRate', '$silverRate', '$userId', '$schemeno' + CAST($regNo AS VARCHAR),$pgrswt,$pnetwt,$pamount,@refno)
-    ''';
-*/
-
       String query = '''
   
 DECLARE @vouno INT;
@@ -390,7 +344,8 @@ DECLARE @vouno INT;
     
     DECLARE @refno VARCHAR(50);
 
-
+DECLARE @accno VARCHAR(50);
+SET @accno = '$schemeno' + CAST(@regno AS VARCHAR);
     SELECT TOP 1 
         @refno = 'ONLINE' + CAST(RNO AS VARCHAR)
     
@@ -398,25 +353,20 @@ DECLARE @vouno INT;
     
     DECLARE @time TIME = CONVERT(TIME, GETDATE());
     SELECT @vouno = ISNULL(MAX(vouno), 0) + 1 FROM MNTHSCHEME;
+      EXEC dbo.MNTH_ENTRY @VOUNO = @vouno,@ROD = '$rod',@SCHNAME = '$schName',@SCHCODE = '$schemeno',@SCHAMT = '$schAmt',@REGNO = @regno,@CASH = '$cash',
+   @CARD = '$card',@CARDNAME = '$cardName', @CHITID = '$chitId',@FLAG = '$flag',@CANCEL = '$cancel',@BRANCHID = '$branchId',
+   @METVAL = '$metval',@SCHEMEID = '$schemeId',@GOLDRATE = '$goldRate',@SILVERRATE = '$silverRate',@USERID = '$userId',
+   @accno = @accno,@pgrswt = '$pgrswt',@pnetwt = '$pnetwt',@pamount = '$pamount',@TRANS_ID = '$Trans_id',@STATUS = '$status',@refno = @refno
+   
  
-       INSERT INTO MNTHSCHEME (VOUNO, ROD, SCHNAME, SCHCODE, SCHAMT, REGNO, 
-       CASH, CARD, CARDNAME, CHITID, FLAG, CANCEL, BRANCHID, METVAL, SCHEMEID,
-        GOLDRATE, SILVERRATE, USERID, accno, pgrswt, pnetwt, pamount, TRANS_ID, STATUS, refno,[time])
-          VALUES (@vouno, '$rod', '$schName', '$schemeno', '$schAmt', @regno, '$cash', 
-          '$card', '$cardName', '$chitId', '$flag', '$cancel', '$branchId', '$pgrswt',
-           '$schemeId', '$goldRate', '$silverRate', '$userId', '$schemeno' + CAST(@regno AS VARCHAR),
-            '$pgrswt', '$pnetwt', '$pamount', '$Trans_id', '$status',@refno,@time)
-''';
-
-/*
-      DECLARE @vouno INT;
-    DECLARE @regno INT = $regNo; -- assign before using
-    DECLARE @refno VARCHAR(50) = 'ONLINE' + CAST(@regno AS VARCHAR);
-
-    SELECT @vouno = ISNULL(MAX(vouno), 0) + 1 FROM MNTHSCHEME;
-    INSERT INTO MNTHSCHEME (VOUNO, ROD, SCHNAME, SCHCODE, SCHAMT, REGNO, CASH, CARD, CARDNAME, CHITID, FLAG, CANCEL, BRANCHID, METVAL, SCHEMEID, GOLDRATE, SILVERRATE, USERID, accno, pgrswt, pnetwt, pamount, TRANS_ID, STATUS, refno)
-    VALUES (@vouno, '$rod', '$schName', '$schemeno', '$schAmt', @regno, '$cash', '$card', '$cardName', '$chitId', '$flag', '$cancel', '$branchId', '$pgrswt', '$schemeId', '$goldRate', '$silverRate', '$userId', '$schemeno' + CAST(@regno AS VARCHAR), '$pgrswt', '$pnetwt', '$pamount', '$Trans_id', '$status', @refno)
-*/
+      ''';
+      // INSERT INTO MNTHSCHEME (VOUNO, ROD, SCHNAME, SCHCODE, SCHAMT, REGNO,
+      // CASH, CARD, CARDNAME, CHITID, FLAG, CANCEL, BRANCHID, METVAL, SCHEMEID,
+      //  GOLDRATE, SILVERRATE, USERID, accno, pgrswt, pnetwt, pamount, TRANS_ID, STATUS, refno,[time])
+      //    VALUES (@vouno, '$rod', '$schName', '$schemeno', '$schAmt', @regno, '$cash',
+      //    '$card', '$cardName', '$chitId', '$flag', '$cancel', '$branchId', '$pgrswt',
+      //     '$schemeId', '$goldRate', '$silverRate', '$userId', '$schemeno' + CAST(@regno AS VARCHAR),
+      //      '$pgrswt', '$pnetwt', '$pamount', '$Trans_id', '$status',@refno,@time)
 
       print(query + 'aaaaaaaaaaaaaaaa');
       commonUtils.log.i(query);
