@@ -41,7 +41,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  fluttertoast: any
+
 
   mssql_connection: any
   sqflite: any
