@@ -569,7 +569,7 @@ class _payment_gatewayState extends State<payment_gateway> {
         "Code: ${response.code}\nDescription: ${response.message}\nMetadata:${response.error.toString()}");
   }
 
-  Future<void> handlePaymentSuccessResponse(
+  Future<void> handlePaymentSuccessResponse (
       PaymentSuccessResponse response) async {
     transactionId =
         response.paymentId ?? response.data?["razorpay_payment_id"] ?? "";
